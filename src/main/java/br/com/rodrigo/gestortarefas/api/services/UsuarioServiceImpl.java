@@ -1,0 +1,136 @@
+package br.com.rodrigo.gestortarefas.api.services;
+
+import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
+import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
+import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
+import br.com.rodrigo.gestortarefas.api.model.Perfil;
+import br.com.rodrigo.gestortarefas.api.model.Pessoa;
+import br.com.rodrigo.gestortarefas.api.model.Usuario;
+import br.com.rodrigo.gestortarefas.api.model.form.UsuarioForm;
+import br.com.rodrigo.gestortarefas.api.model.response.PerfilResponse;
+import br.com.rodrigo.gestortarefas.api.model.response.UsuarioResponse;
+import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
+import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm, UsuarioResponse> {
+
+    private final PasswordEncoder passwordEncoder;
+    private final PerfilServiceImpl perfilService;
+    private final UsuarioRepository usuarioRepository;
+
+    public UsuarioServiceImpl(PasswordEncoder passwordEncoder,
+                              PerfilServiceImpl perfilService,
+                              UsuarioRepository usuarioRepository) {
+        super(usuarioRepository);
+        this.passwordEncoder = passwordEncoder;
+        this.perfilService = perfilService;
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    @Override
+    protected String getEntidadeNome() {
+        return "Usuário";
+    }
+
+    @Override
+    protected Usuario criarEntidade(UsuarioForm usuarioForm, Long id) {
+        verificarUnicidadeEmailCpf(usuarioForm.getEmail(), usuarioForm.getCpf(), id);
+        Usuario usuario = buscarOuCriarUsuario(id);
+        mapearDadosUsuario(usuarioForm, usuario);
+        configurarPerfis(usuario, usuarioForm.getPerfil());
+        return usuario;
+    }
+
+    public Page<UsuarioResponse> listarTodos(int page, int size, String sort, String email,
+                                             String nome, String cpf, Long perfilId) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));
+        Page<Usuario> usuarios = usuarioRepository.findAll(email, nome, cpf, perfilId, pageable);
+        return usuarios.map(usuario -> ModelMapperUtil.map(usuario, UsuarioResponse.class));
+    }
+
+    private Usuario buscarOuCriarUsuario(Long id) {
+        return (id != null) ? repository.findById(id)
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(
+                        MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(id)))
+                : new Usuario();
+    }
+
+    private void mapearDadosUsuario(UsuarioForm usuarioForm, Usuario usuario) {
+        ModelMapperUtil.map(usuarioForm, usuario);
+        usuario.setSenha(passwordEncoder.encode(usuarioForm.getSenha()));
+
+        if (usuario.getPessoa() == null) {
+            usuario.setPessoa(new Pessoa());
+        }
+
+        ModelMapperUtil.map(usuarioForm, usuario.getPessoa());
+    }
+
+    private void configurarPerfis(Usuario usuario, Long perfilId) {
+        PerfilResponse perfilResponse = perfilService.obterPorId(perfilId);
+        Perfil perfil = ModelMapperUtil.map(perfilResponse, Perfil.class);
+        usuario.setPerfis(Collections.singleton(perfil));
+    }
+
+    @Override
+    protected UsuarioResponse construirDto(Usuario usuario) {
+        return ModelMapperUtil.map(usuario, UsuarioResponse.class);
+    }
+
+    @Override
+    protected void ativar(Usuario usuario) {
+        usuario.ativar();
+    }
+
+    @Override
+    protected void desativar(Usuario usuario) {
+        usuario.desativar();
+    }
+
+    public List<String> obterPerfis(String email) {
+        Usuario usuario = obterUsuarioPorEmail(email);
+        return usuario.getPerfis().stream().map(Perfil::getNome).collect(Collectors.toList());
+    }
+
+    public Usuario obterUsuarioPorEmail(String email) {
+        return usuarioRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(
+                        MensagensError.USUARIO_NAO_ENCONTRADO_POR_LOGIN.getMessage(email)));
+    }
+
+    public Usuario obterUsuarioLogado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return obterUsuarioPorEmail(authentication.getName());
+    }
+
+    private void verificarUnicidadeEmailCpf(String email, String cpf, Long id) {
+        if (id == null) {
+            if (usuarioRepository.existsByEmailIgnoreCase(email)) {
+                throw new ViolacaoIntegridadeDadosException(MensagensError.EMAIL_JA_CADASTRADO.getMessage(email));
+            }
+            if (usuarioRepository.existsByPessoaCpf(cpf)) {
+                throw new ViolacaoIntegridadeDadosException(MensagensError.CPF_JA_CADASTRADO.getMessage(cpf));
+            }
+        } else {
+            if (usuarioRepository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
+                throw new ViolacaoIntegridadeDadosException(MensagensError.EMAIL_JA_CADASTRADO.getMessage(email));
+            }
+            if (usuarioRepository.existsByPessoaCpfAndIdNot(cpf, id)) {
+                throw new ViolacaoIntegridadeDadosException(MensagensError.CPF_JA_CADASTRADO.getMessage(cpf));
+            }
+        }
+    }
+}
