@@ -54,6 +54,12 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
         return usuario;
     }
 
+    @Override
+    public UsuarioResponse atualizar(Long id, UsuarioForm form) {
+        form.setSenha(passwordEncoder.encode(form.getSenha()));
+        return super.atualizar(id, form);
+    }
+
     public Page<UsuarioResponse> listarTodos(int page, int size, String sort, String email,
                                              String nome, String cpf, Long perfilId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));

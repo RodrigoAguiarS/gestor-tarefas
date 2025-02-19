@@ -43,12 +43,12 @@ public abstract class GenericServiceImpl<Entity, Form, Response> implements Gene
         Entity entidadeExistente = repository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.ENTIDADE_NAO_ENCONTRADO.getMessage(getEntidadeNome())));
 
-        mapNonNullFields(form, entidadeExistente);
+        mapearCamposNaoNulos(form, entidadeExistente);
         entidadeExistente = repository.save(entidadeExistente);
         return construirDto(entidadeExistente);
     }
 
-    private void mapNonNullFields(Form form, Entity entidadeExistente) {
+    private void mapearCamposNaoNulos(Form form, Entity entidadeExistente) {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.map(form, entidadeExistente);
