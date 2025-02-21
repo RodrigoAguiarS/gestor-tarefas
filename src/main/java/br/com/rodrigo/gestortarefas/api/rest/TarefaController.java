@@ -69,7 +69,7 @@ public class TarefaController extends GenericControllerImpl<TarefaForm, TarefaRe
 
     @GetMapping("/responsavel/tarefas-concluidas")
     public ResponseEntity<List<UsuarioComTarefasConcluidasResponse>> listarUsuariosComTarefasConcluidas() {
-        List<UsuarioComTarefasConcluidasResponse> usuarios = tarefaServiceImpl.listarUsuariosComTarefasConcluidas();
+        List<UsuarioComTarefasConcluidasResponse> usuarios = tarefaServiceImpl.listarTop10UsuariosComTarefasConcluidas();
         return ResponseEntity.ok(usuarios);
     }
 }

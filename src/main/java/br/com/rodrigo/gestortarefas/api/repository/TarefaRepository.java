@@ -36,7 +36,7 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
     @Query("SELECT t.situacao, COUNT(t) FROM Tarefa t GROUP BY t.situacao")
     List<Object[]> countTarefasBySituacao();
 
-    @Query("SELECT u, COUNT(t) FROM Usuario u LEFT JOIN Tarefa t ON u.id = t.responsavel.id AND t.situacao = 'CONCLUIDA' GROUP BY u")
-    List<Object[]> findUsuariosComTarefasConcluidas();
+    @Query("SELECT u, COUNT(t) FROM Usuario u LEFT JOIN Tarefa t ON u.id = t.responsavel.id AND t.situacao = 'CONCLUIDA' GROUP BY u ORDER BY COUNT(t) DESC")
+    List<Object[]> findTop10UsuariosComTarefasConcluidas(Pageable pageable);
 
 }

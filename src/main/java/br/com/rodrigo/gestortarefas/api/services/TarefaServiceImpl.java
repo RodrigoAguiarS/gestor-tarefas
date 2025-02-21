@@ -113,8 +113,9 @@ public class TarefaServiceImpl extends GenericServiceImpl<Tarefa, TarefaForm, Ta
                 ));
     }
 
-    public List<UsuarioComTarefasConcluidasResponse> listarUsuariosComTarefasConcluidas() {
-        List<Object[]> resultados = tarefaRepository.findUsuariosComTarefasConcluidas();
+    public List<UsuarioComTarefasConcluidasResponse> listarTop10UsuariosComTarefasConcluidas() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Object[]> resultados = tarefaRepository.findTop10UsuariosComTarefasConcluidas(pageable);
         return resultados.stream()
                 .map(resultado -> new UsuarioComTarefasConcluidasResponse(
                         ModelMapperUtil.map((Usuario) resultado[0], UsuarioResponse.class),
