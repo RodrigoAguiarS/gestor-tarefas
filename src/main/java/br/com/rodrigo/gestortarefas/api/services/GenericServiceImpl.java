@@ -2,7 +2,7 @@ package br.com.rodrigo.gestortarefas.api.services;
 
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
-import org.modelmapper.ModelMapper;
+import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,15 +43,9 @@ public abstract class GenericServiceImpl<Entity, Form, Response> implements Gene
         Entity entidadeExistente = repository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.ENTIDADE_NAO_ENCONTRADO.getMessage(getEntidadeNome())));
 
-        mapearCamposNaoNulos(form, entidadeExistente);
+        ModelMapperUtil.map(form, entidadeExistente);
         entidadeExistente = repository.save(entidadeExistente);
         return construirDto(entidadeExistente);
-    }
-
-    void mapearCamposNaoNulos(Form form, Entity entidadeExistente) {
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setSkipNullEnabled(true);
-        modelMapper.map(form, entidadeExistente);
     }
 
     @Override

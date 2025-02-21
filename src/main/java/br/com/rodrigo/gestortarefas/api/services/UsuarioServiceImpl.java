@@ -15,8 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -56,8 +54,13 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
 
     @Override
     public UsuarioResponse atualizar(Long id, UsuarioForm form) {
-        form.setSenha(passwordEncoder.encode(form.getSenha()));
-        return super.atualizar(id, form);
+        Usuario entidadeExistente = repository.findById(id)
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.ENTIDADE_NAO_ENCONTRADO.getMessage(getEntidadeNome())));
+        verificarUnicidadeEmailCpf(form.getEmail(), form.getCpf(), id);
+        mapearDadosUsuario(form, entidadeExistente);
+        configurarPerfis(entidadeExistente, form.getPerfil());
+        entidadeExistente = repository.save(entidadeExistente);
+        return construirDto(entidadeExistente);
     }
 
     public Page<UsuarioResponse> listarTodos(int page, int size, String sort, String email,
@@ -115,11 +118,6 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
         return usuarioRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.USUARIO_NAO_ENCONTRADO_POR_LOGIN.getMessage(email)));
-    }
-
-    public Usuario obterUsuarioLogado() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return obterUsuarioPorEmail(authentication.getName());
     }
 
     private void verificarUnicidadeEmailCpf(String email, String cpf, Long id) {

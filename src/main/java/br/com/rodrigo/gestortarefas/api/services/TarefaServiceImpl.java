@@ -68,8 +68,7 @@ public class TarefaServiceImpl extends GenericServiceImpl<Tarefa, TarefaForm, Ta
                             MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(form.getResponsavel())));
             tarefaExistente.setResponsavel(responsavel);
         }
-
-        mapearCamposNaoNulos(form, tarefaExistente);
+        ModelMapperUtil.map(form, tarefaExistente);
         tarefaExistente = repository.save(tarefaExistente);
         return construirDto(tarefaExistente);
     }
