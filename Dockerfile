@@ -1,5 +1,5 @@
-# Usa a imagem do JDK 17 para compilar e rodar a aplicação
-FROM eclipse-temurin:17-jdk AS builder
+# Usa a imagem do JDK 21 para compilar e rodar a aplicação
+FROM eclipse-temurin:21-jdk AS builder
 
 # Define o diretório de trabalho
 WORKDIR /app
@@ -11,10 +11,10 @@ COPY . .
 RUN chmod +x gradlew
 
 # Executa o build do projeto dentro do container
-RUN ./gradlew clean build --no-daemon
+RUN ./gradlew clean build --no-daemon --stacktrace
 
 # Usa uma nova imagem para rodar a aplicação, reduzindo o tamanho final
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
