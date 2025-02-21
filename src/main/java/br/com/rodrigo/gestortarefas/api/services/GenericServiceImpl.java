@@ -48,7 +48,7 @@ public abstract class GenericServiceImpl<Entity, Form, Response> implements Gene
         return construirDto(entidadeExistente);
     }
 
-    private void mapearCamposNaoNulos(Form form, Entity entidadeExistente) {
+    void mapearCamposNaoNulos(Form form, Entity entidadeExistente) {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.map(form, entidadeExistente);
