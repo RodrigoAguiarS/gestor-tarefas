@@ -5,7 +5,7 @@ FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
 # Copia o arquivo JAR gerado pelo Gradle
-COPY build/libs/*.jar app.jar
+COPY build/libs/gestortarefas-0.0.1-SNAPSHOT.jar app.jar
 
 # Garante que o arquivo JAR seja copiado corretamente
 RUN ls -l app.jar
