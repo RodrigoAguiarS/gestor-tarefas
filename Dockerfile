@@ -7,6 +7,9 @@ WORKDIR /app
 # Copia os arquivos do projeto
 COPY . .
 
+# Dá permissão de execução ao Gradle Wrapper
+RUN chmod +x gradlew
+
 # Executa o build do projeto dentro do container
 RUN ./gradlew clean build --no-daemon
 
