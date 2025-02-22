@@ -16,7 +16,7 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://gestor-tarefas-front-2pch-lihohcvrz-rodrigoaguiars-projects.vercel.app"));
+        configuration.setAllowedOrigins(List.of("https://gestor-tarefas-front.vercel.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));
