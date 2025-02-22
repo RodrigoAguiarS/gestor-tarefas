@@ -6,6 +6,7 @@ import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -32,6 +33,7 @@ public abstract class GenericServiceImpl<Entity, Form, Response> implements Gene
     }
 
     @Override
+    @Transactional
     public Response cadastrar(Form form) {
         Entity entidade = criarEntidade(form, null);
         entidade = repository.save(entidade);
