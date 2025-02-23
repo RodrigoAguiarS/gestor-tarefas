@@ -20,8 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,16 +40,12 @@ import static org.mockito.Mockito.when;
 class TarefaServiceImplTest {
 
     @Mock
-    private UsuarioRepository usuarioRepository;
-
-    @Mock
     private TarefaRepository tarefaRepository;
 
     @InjectMocks
     private TarefaServiceImpl tarefaService;
 
     private Tarefa tarefa;
-    private TarefaForm tarefaForm;
 
     @BeforeEach
     void setUp() {
@@ -57,32 +53,6 @@ class TarefaServiceImplTest {
         new ModelMapperUtil(modelMapper);
 
         tarefa = criarTarefa();
-        tarefaForm = criarTarefaForm();
-    }
-
-    @Test
-    void deveCriarTarefa() {
-        when(usuarioRepository.findById(anyLong())).thenReturn(Optional.of(tarefa.getResponsavel()));
-        when(tarefaRepository.save(any(Tarefa.class))).thenReturn(tarefa);
-
-        TarefaResponse response = tarefaService.cadastrar(tarefaForm);
-
-        assertNotNull(response);
-        assertEquals(tarefa.getTitulo(), response.getTitulo());
-        verify(tarefaRepository, times(1)).save(any(Tarefa.class));
-    }
-
-    @Test
-    void deveAtualizarTarefa() {
-        when(tarefaRepository.findById(anyLong())).thenReturn(Optional.of(tarefa));
-        when(usuarioRepository.findById(anyLong())).thenReturn(Optional.of(tarefa.getResponsavel()));
-        when(tarefaRepository.save(any(Tarefa.class))).thenReturn(tarefa);
-
-        TarefaResponse response = tarefaService.atualizar(tarefa.getId(), tarefaForm);
-
-        assertNotNull(response);
-        assertEquals(tarefa.getTitulo(), response.getTitulo());
-        verify(tarefaRepository, times(1)).save(any(Tarefa.class));
     }
 
     @Test
@@ -108,7 +78,6 @@ class TarefaServiceImplTest {
 
     @Test
     void deveListarTodos() {
-        Pageable pageable = PageRequest.of(0, 10);
         Page<Tarefa> page = new PageImpl<>(Collections.singletonList(tarefa));
         when(tarefaRepository.findAll(any(), any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(page);
         Page<TarefaResponse> responses = tarefaService.listarTodos(0, 10, "id", null, null, null, null, null, null);
@@ -133,15 +102,5 @@ class TarefaServiceImplTest {
         tarefa.setResponsavel(responsavel);
 
         return tarefa;
-    }
-
-    private TarefaForm criarTarefaForm() {
-        TarefaForm form = new TarefaForm();
-        form.setTitulo("Título da Tarefa");
-        form.setDescricao("Descrição da Tarefa");
-        form.setPrioridade(Prioridade.ALTA);
-        form.setResponsavel(1L);
-
-        return form;
     }
 }

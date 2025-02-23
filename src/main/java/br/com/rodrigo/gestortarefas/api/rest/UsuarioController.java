@@ -44,10 +44,9 @@ public class UsuarioController extends GenericControllerImpl<UsuarioForm, Usuari
         return ResponseEntity.ok(usuarios);
     }
 
-    @GetMapping("/dados")
-    public ResponseEntity<Usuario> obterUsuarioPorEmail(Authentication authentication) {
-        String email = authentication.getName();
-        Usuario usuario = usuarioServiceImpl.obterUsuarioPorEmail(email);
-        return ResponseEntity.ok(usuario);
+    @GetMapping("/logado")
+    public ResponseEntity<UsuarioResponse> obterUsuarioLogado() {
+        UsuarioResponse usuarioResponse = usuarioServiceImpl.construirDto(usuarioServiceImpl.obterUsuarioLogado());
+        return ResponseEntity.ok(usuarioResponse);
     }
 }

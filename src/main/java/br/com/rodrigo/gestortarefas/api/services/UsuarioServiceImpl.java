@@ -15,6 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -63,6 +65,11 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
         return construirDto(entidadeExistente);
     }
 
+    public Usuario obterUsuarioLogado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return obterUsuarioPorEmail(authentication.getName());
+    }
+
     public Page<UsuarioResponse> listarTodos(int page, int size, String sort, String email,
                                              String nome, String cpf, Long perfilId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));
@@ -95,7 +102,7 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
     }
 
     @Override
-    protected UsuarioResponse construirDto(Usuario usuario) {
+    public UsuarioResponse construirDto(Usuario usuario) {
         return ModelMapperUtil.map(usuario, UsuarioResponse.class);
     }
 
