@@ -29,14 +29,16 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
 
     private final PasswordEncoder passwordEncoder;
     private final PerfilServiceImpl perfilService;
+    private final SmsService smsService;
     private final UsuarioRepository usuarioRepository;
 
     public UsuarioServiceImpl(PasswordEncoder passwordEncoder,
                               PerfilServiceImpl perfilService,
-                              UsuarioRepository usuarioRepository) {
+                              SmsService smsService, UsuarioRepository usuarioRepository) {
         super(usuarioRepository);
         this.passwordEncoder = passwordEncoder;
         this.perfilService = perfilService;
+        this.smsService = smsService;
         this.usuarioRepository = usuarioRepository;
     }
 
@@ -48,6 +50,7 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
     @Override
     protected Usuario criarEntidade(UsuarioForm usuarioForm, Long id) {
         verificarUnicidadeEmailCpf(usuarioForm.getEmail(), usuarioForm.getCpf(), id);
+        smsService.enviarSenhaSms("+55" + usuarioForm.getTelefone(), usuarioForm.getSenha());
         Usuario usuario = buscarOuCriarUsuario(id);
         mapearDadosUsuario(usuarioForm, usuario);
         configurarPerfis(usuario, usuarioForm.getPerfil());
@@ -62,6 +65,7 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
         mapearDadosUsuario(form, entidadeExistente);
         configurarPerfis(entidadeExistente, form.getPerfil());
         entidadeExistente = repository.save(entidadeExistente);
+        smsService.enviarSenhaSms("+55" + form.getTelefone(), form.getSenha());
         return construirDto(entidadeExistente);
     }
 

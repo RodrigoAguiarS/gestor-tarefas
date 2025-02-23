@@ -6,6 +6,8 @@ public enum MensagensError {
     ENTIDADE_NAO_ENCONTRADO("Entidade não encontrada"),
     USUARIO_NAO_ENCONTRADO_POR_LOGIN("Usuário não encontrado para o login %s"),
     PERFIL_POSSUI_USUARIO("Perfil não pode ser apagado, está vinculado a um usuário"),
+    SMS_ENVIADO_SUCESSO("SMS enviado com sucesso! ID: %s"),
+    ERRO_ENVIO_SMS("Erro ao enviar SMS: %s"),
     EMAIL_JA_CADASTRADO("E-mail %s já cadastrado"),
     CPF_JA_CADASTRADO("CPF %s já cadastrado"),
     USUARIO_NAO_ENCONTRADO_POR_ID("Usuário não encontrado para o id %s");
