@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Optional;
 
@@ -29,7 +30,7 @@ public class PerfilController extends ControllerBase<PerfilResponse> {
     @PostMapping
     public ResponseEntity<PerfilResponse> criar(@RequestBody @Valid PerfilForm perfilForm) {
         PerfilResponse response = perfilService.criar(perfilForm);
-        return responderItemCriado(response);
+        return responderItemCriadoComURI(response, ServletUriComponentsBuilder.fromCurrentRequest(), "/{id}", response.getId().toString());
     }
 
     @PutMapping("/{id}")

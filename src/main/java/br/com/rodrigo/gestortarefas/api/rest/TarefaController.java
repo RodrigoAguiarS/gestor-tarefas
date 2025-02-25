@@ -6,6 +6,7 @@ import br.com.rodrigo.gestortarefas.api.model.form.TarefaForm;
 import br.com.rodrigo.gestortarefas.api.model.response.TarefaResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.UsuarioComTarefasConcluidasResponse;
 import br.com.rodrigo.gestortarefas.api.services.TarefaServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -32,13 +33,13 @@ public class TarefaController extends ControllerBase<TarefaResponse> {
     private final TarefaServiceImpl tarefaServiceImpl;
 
     @PostMapping
-    public ResponseEntity<TarefaResponse> criar(@RequestBody TarefaForm tarefaForm, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<TarefaResponse> criar(@RequestBody @Valid TarefaForm tarefaForm,  UriComponentsBuilder uriBuilder) {
         TarefaResponse response = tarefaServiceImpl.criar(tarefaForm);
         return responderItemCriadoComURI(response, uriBuilder, "/tarefas/{id}", response.getId().toString());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TarefaResponse> atualizar(@PathVariable Long id, @RequestBody TarefaForm tarefaForm) {
+    public ResponseEntity<TarefaResponse> atualizar(@PathVariable Long id, @RequestBody @Valid TarefaForm tarefaForm) {
         TarefaResponse response = tarefaServiceImpl.atualizar(id, tarefaForm);
         return responderSucessoComItem(response);
     }
