@@ -38,6 +38,10 @@ public abstract class ControllerBase<T> {
         return ResponseEntity.status(HttpStatus.OK).body(listaVazia);
     }
 
+    protected ResponseEntity<Void> responderSemConteudo() {
+        return ResponseEntity.noContent().build();
+    }
+
     protected ResponseEntity<List<T>> responderListaDeItens(List<T> itens) {
         return ResponseEntity.status(HttpStatus.OK).body(itens);
     }
