@@ -11,6 +11,7 @@ import br.com.rodrigo.gestortarefas.api.model.response.PerfilResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.UsuarioResponse;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,33 +23,60 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
-public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm, UsuarioResponse> {
+@RequiredArgsConstructor
+public class UsuarioServiceImpl implements IUsuario {
 
     private final PasswordEncoder passwordEncoder;
     private final PerfilServiceImpl perfilService;
     private final SmsService smsService;
     private final UsuarioRepository usuarioRepository;
 
-    public UsuarioServiceImpl(PasswordEncoder passwordEncoder,
-                              PerfilServiceImpl perfilService,
-                              SmsService smsService, UsuarioRepository usuarioRepository) {
-        super(usuarioRepository);
-        this.passwordEncoder = passwordEncoder;
-        this.perfilService = perfilService;
-        this.smsService = smsService;
-        this.usuarioRepository = usuarioRepository;
+    @Override
+    public UsuarioResponse criar(UsuarioForm usuarioForm) {
+        Usuario usuario = criarEntidade(usuarioForm, null);
+        usuario = usuarioRepository.save(usuario);
+        return construirDto(usuario);
     }
 
     @Override
-    protected String getEntidadeNome() {
-        return "Usuário";
+    public UsuarioResponse atualizar(Long id, UsuarioForm form) {
+        Usuario usuario = criarEntidade(form, id);
+        usuario = usuarioRepository.save(usuario);
+        return construirDto(usuario);
     }
 
     @Override
-    protected Usuario criarEntidade(UsuarioForm usuarioForm, Long id) {
+    public void deletar(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(id)));
+        usuarioRepository.delete(usuario);
+    }
+
+    @Override
+    public Optional<UsuarioResponse> consultarPorId(Long id) {
+        return usuarioRepository.findById(id).map(this::construirDto);
+    }
+
+    @Override
+    public Page<UsuarioResponse> buscar(int page, int size, String sort, String email,
+                                        String nome, String cpf, Long perfilId) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));
+        Page<Usuario> usuarios = usuarioRepository.findAll(email, nome, cpf, perfilId, pageable);
+        return usuarios.map(usuario -> ModelMapperUtil.map(usuario, UsuarioResponse.class));
+    }
+
+    @Override
+    public Page<UsuarioResponse> listarTodos(Pageable pageable) {
+        Page<Usuario> usuarios = usuarioRepository.findAll(pageable);
+        return usuarios.map(usuario -> ModelMapperUtil.map(usuario, UsuarioResponse.class));
+    }
+
+    private Usuario criarEntidade(UsuarioForm usuarioForm, Long id) {
         verificarUnicidadeEmailCpf(usuarioForm.getEmail(), usuarioForm.getCpf(), id);
         smsService.enviarSenhaSms("+55" + usuarioForm.getTelefone(), usuarioForm.getSenha());
         Usuario usuario = buscarOuCriarUsuario(id);
@@ -57,32 +85,8 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
         return usuario;
     }
 
-    @Override
-    public UsuarioResponse atualizar(Long id, UsuarioForm form) {
-        Usuario entidadeExistente = repository.findById(id)
-                .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.ENTIDADE_NAO_ENCONTRADO.getMessage(getEntidadeNome())));
-        verificarUnicidadeEmailCpf(form.getEmail(), form.getCpf(), id);
-        mapearDadosUsuario(form, entidadeExistente);
-        configurarPerfis(entidadeExistente, form.getPerfil());
-        entidadeExistente = repository.save(entidadeExistente);
-        smsService.enviarSenhaSms("+55" + form.getTelefone(), form.getSenha());
-        return construirDto(entidadeExistente);
-    }
-
-    public Usuario obterUsuarioLogado() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return obterUsuarioPorEmail(authentication.getName());
-    }
-
-    public Page<UsuarioResponse> listarTodos(int page, int size, String sort, String email,
-                                             String nome, String cpf, Long perfilId) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));
-        Page<Usuario> usuarios = usuarioRepository.findAll(email, nome, cpf, perfilId, pageable);
-        return usuarios.map(usuario -> ModelMapperUtil.map(usuario, UsuarioResponse.class));
-    }
-
     private Usuario buscarOuCriarUsuario(Long id) {
-        return (id != null) ? repository.findById(id)
+        return (id != null) ? usuarioRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(id)))
                 : new Usuario();
@@ -100,26 +104,22 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
     }
 
     private void configurarPerfis(Usuario usuario, Long perfilId) {
-        PerfilResponse perfilResponse = perfilService.obterPorId(perfilId);
-        Perfil perfil = ModelMapperUtil.map(perfilResponse, Perfil.class);
-        usuario.setPerfis(Collections.singleton(perfil));
+        Optional<PerfilResponse> perfilResponse = perfilService.consultarPorId(perfilId);
+        if (perfilResponse.isPresent()) {
+            Perfil perfil = ModelMapperUtil.map(perfilResponse.get(), Perfil.class);
+            usuario.setPerfis(Collections.singleton(perfil));
+        } else {
+            throw new ObjetoNaoEncontradoException(MensagensError.PERFIL_NAO_ENCONTRADO.getMessage(perfilId));
+        }
     }
 
     @Override
-    public UsuarioResponse construirDto(Usuario usuario) {
-        return ModelMapperUtil.map(usuario, UsuarioResponse.class);
+    public Usuario obterUsuarioLogado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return obterUsuarioPorEmail(authentication.getName());
     }
 
     @Override
-    protected void ativar(Usuario usuario) {
-        usuario.ativar();
-    }
-
-    @Override
-    protected void desativar(Usuario usuario) {
-        usuario.desativar();
-    }
-
     public List<String> obterPerfis(String email) {
         Usuario usuario = obterUsuarioPorEmail(email);
         return usuario.getPerfis().stream().map(Perfil::getNome).collect(Collectors.toList());
@@ -147,5 +147,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
                 throw new ViolacaoIntegridadeDadosException(MensagensError.CPF_JA_CADASTRADO.getMessage(cpf));
             }
         }
+    }
+
+    private UsuarioResponse construirDto(Usuario usuario) {
+        return ModelMapperUtil.map(usuario, UsuarioResponse.class);
     }
 }

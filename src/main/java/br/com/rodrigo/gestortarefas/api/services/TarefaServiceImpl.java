@@ -1,6 +1,5 @@
 package br.com.rodrigo.gestortarefas.api.services;
 
-
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.model.Prioridade;
@@ -14,63 +13,76 @@ import br.com.rodrigo.gestortarefas.api.model.response.UsuarioResponse;
 import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+
 
 @Service
-public class TarefaServiceImpl extends GenericServiceImpl<Tarefa, TarefaForm, TarefaResponse> {
+@RequiredArgsConstructor
+public class TarefaServiceImpl implements ITarefa {
 
     private final UsuarioRepository usuarioRepository;
-
     private final TarefaRepository tarefaRepository;
 
-    protected TarefaServiceImpl(JpaRepository<Tarefa, Long> repository, UsuarioRepository usuarioRepository, TarefaRepository tarefaRepository) {
-        super(repository);
-        this.usuarioRepository = usuarioRepository;
-        this.tarefaRepository = tarefaRepository;
+    @Override
+    public TarefaResponse criar(TarefaForm tarefaForm) {
+        Tarefa tarefa = criarEntidade(tarefaForm, null);
+        tarefa = tarefaRepository.save(tarefa);
+        return construirDto(tarefa);
     }
 
-    @Override
-    protected Tarefa criarEntidade(TarefaForm tarefaForm, Long id) {
-        Tarefa tarefa = ModelMapperUtil.map(tarefaForm, Tarefa.class);
-        if (isNotEmpty(id)) {
-            tarefa.setId(id);
-        }
-        if (isEmpty(tarefa.getResponsavel())) {
-            Usuario responsavel = usuarioRepository.findById(tarefaForm.getResponsavel())
-                    .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                            MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(tarefaForm.getResponsavel())));
-            tarefa.setResponsavel(responsavel);
+    private Tarefa criarEntidade(TarefaForm form, Tarefa tarefaExistente) {
+        Tarefa tarefa = tarefaExistente != null ? tarefaExistente : new Tarefa();
+        ModelMapperUtil.map(form, tarefa);
+        if (isEmpty(tarefaExistente)) {
             tarefa.setSituacao(Situacao.PENDENTE);
         }
+        Usuario responsavel = usuarioRepository.findById(form.getResponsavel())
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(
+                        MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(form.getResponsavel())));
+        tarefa.setResponsavel(responsavel);
         return tarefa;
     }
 
     @Override
     public TarefaResponse atualizar(Long id, TarefaForm form) {
-        Tarefa tarefaExistente = repository.findById(id)
-                .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.ENTIDADE_NAO_ENCONTRADO.getMessage(getEntidadeNome())));
+        Tarefa tarefaExistente = tarefaRepository.findById(id)
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.TAREFA_NAO_ENCONTRADA_POR_ID.getMessage(id)));
 
-        if (isNotEmpty(form.getResponsavel())) {
-            Usuario responsavel = usuarioRepository.findById(form.getResponsavel())
-                    .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                            MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(form.getResponsavel())));
-            tarefaExistente.setResponsavel(responsavel);
-        }
-        ModelMapperUtil.map(form, tarefaExistente);
-        tarefaExistente = repository.save(tarefaExistente);
+        criarEntidade(form, tarefaExistente);
+        tarefaExistente = tarefaRepository.save(tarefaExistente);
         return construirDto(tarefaExistente);
+    }
+
+    @Override
+    public void deletar(Long id) {
+        Tarefa tarefa = tarefaRepository.findById(id)
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.TAREFA_NAO_ENCONTRADA_POR_ID.getMessage(id)));
+        tarefaRepository.delete(tarefa);
+    }
+
+    @Override
+    public Optional<TarefaResponse> consultarPorId(Long id) {
+        return tarefaRepository.findById(id).map(this::construirDto);
+    }
+
+    @Override
+    public Page<TarefaResponse> listarTodos(int page, int size, String sort, Long id, String titulo,
+                                            String descricao, Situacao situacao, Prioridade prioridade, Long responsavelId) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));
+        Page<Tarefa> tarefas = tarefaRepository.findAll(id, titulo, descricao, situacao, prioridade, responsavelId, pageable);
+        return tarefas.map(tarefa -> ModelMapperUtil.map(tarefa, TarefaResponse.class));
     }
 
     public List<TarefaResponse> listarTarefasPorResponsavel(Long id) {
@@ -83,7 +95,7 @@ public class TarefaServiceImpl extends GenericServiceImpl<Tarefa, TarefaForm, Ta
     public void concluirTarefa(Long id) {
         Tarefa tarefa = tarefaRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.ENTIDADE_NAO_ENCONTRADO.getMessage(getEntidadeNome())));
+                        MensagensError.TAREFA_NAO_ENCONTRADA_POR_ID.getMessage(id)));
         tarefa.setSituacao(Situacao.CONCLUIDA);
         tarefaRepository.save(tarefa);
     }
@@ -91,16 +103,9 @@ public class TarefaServiceImpl extends GenericServiceImpl<Tarefa, TarefaForm, Ta
     public void andamentoTarefa(Long id) {
         Tarefa tarefa = tarefaRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.ENTIDADE_NAO_ENCONTRADO.getMessage(getEntidadeNome())));
+                        MensagensError.TAREFA_NAO_ENCONTRADA_POR_ID.getMessage(id)));
         tarefa.setSituacao(Situacao.EM_ANDAMENTO);
         tarefaRepository.save(tarefa);
-    }
-
-    public Page<TarefaResponse> listarTodos(int page, int size, String sort, Long id, String titulo,
-                                            String descricao, Situacao situacao, Prioridade prioridade, Long responsavelId) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));
-        Page<Tarefa> tarefas = tarefaRepository.findAll(id, titulo, descricao, situacao, prioridade, responsavelId, pageable);
-        return tarefas.map(tarefa -> ModelMapperUtil.map(tarefa, TarefaResponse.class));
     }
 
     public Map<Situacao, Long> contarTarefasPorSituacao() {
@@ -123,18 +128,7 @@ public class TarefaServiceImpl extends GenericServiceImpl<Tarefa, TarefaForm, Ta
                 .collect(Collectors.toList());
     }
 
-    @Override
     protected TarefaResponse construirDto(Tarefa tarefa) {
         return ModelMapperUtil.map(tarefa, TarefaResponse.class);
-    }
-
-    @Override
-    protected void ativar(Tarefa tarefa) {
-        tarefa.ativar();
-    }
-
-    @Override
-    protected void desativar(Tarefa tarefa) {
-        tarefa.desativar();
     }
 }

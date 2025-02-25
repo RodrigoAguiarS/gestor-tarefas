@@ -1,5 +1,6 @@
 package br.com.rodrigo.gestortarefas.api.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -19,8 +20,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class Tarefa extends EntidadeBase {
 
+    @Column(name = "titulo", length = 100)
     private String titulo;
 
+    @Column(name = "descricao", length = 500)
     private String descricao;
 
     @ManyToOne
