@@ -10,7 +10,8 @@ public enum MensagensError {
     ERRO_ENVIO_SMS("Erro ao enviar SMS: %s"),
     EMAIL_JA_CADASTRADO("E-mail %s já cadastrado"),
     CPF_JA_CADASTRADO("CPF %s já cadastrado"),
-    USUARIO_NAO_ENCONTRADO_POR_ID("Usuário não encontrado para o id %s");
+    USUARIO_NAO_ENCONTRADO_POR_ID("Usuário não encontrado para o id %s"),
+    PERFIL_NAO_ENCONTRADO("Perfil não encontrado para o id %s");
 
     private final String message;
 

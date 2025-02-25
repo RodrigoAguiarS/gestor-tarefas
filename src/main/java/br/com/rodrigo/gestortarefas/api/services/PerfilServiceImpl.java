@@ -9,53 +9,63 @@ import br.com.rodrigo.gestortarefas.api.model.response.PerfilResponse;
 import br.com.rodrigo.gestortarefas.api.repository.PerfilRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Service
-public class PerfilServiceImpl extends GenericServiceImpl<Perfil, PerfilForm, PerfilResponse> {
+@RequiredArgsConstructor
+public class PerfilServiceImpl implements IPerfil {
 
+    private final PerfilRepository perfilRepository;
     private final UsuarioRepository usuarioRepository;
 
-    public PerfilServiceImpl(PerfilRepository perfilRepository, UsuarioRepository usuarioRepository) {
-        super(perfilRepository);
-        this.usuarioRepository = usuarioRepository;
+    @Override
+    public PerfilResponse criar(PerfilForm perfilForm) {
+        Perfil perfil = criarEntidade(perfilForm, null);
+        perfil = perfilRepository.save(perfil);
+        return construirDto(perfil);
     }
 
     @Override
-    protected String getEntidadeNome() {
-        return "Perfil";
+    public PerfilResponse atualizar(Long id, PerfilForm perfilForm) {
+        Perfil perfil = criarEntidade(perfilForm, id);
+        perfil = perfilRepository.save(perfil);
+        return construirDto(perfil);
     }
 
     @Override
-    protected Perfil criarEntidade(PerfilForm perfilForm, Long id) {
+    public void deletar(Long id) {
+        validarExclusao(id);
+        perfilRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<PerfilResponse> consultarPorId(Long id) {
+        return perfilRepository.findById(id).map(this::construirDto);
+    }
+
+    @Override
+    public Page<PerfilResponse> consultarTodos(Pageable pageable) {
+        Page<Perfil> perfis = perfilRepository.findAll(pageable);
+        return perfis.map(this::construirDto);
+    }
+
+    private Perfil criarEntidade(PerfilForm perfilForm, Long id) {
         Perfil perfil = ModelMapperUtil.map(perfilForm, Perfil.class);
-        if(isNotEmpty(id)) {
+        if (isNotEmpty(id)) {
             perfil.setId(id);
         }
         return perfil;
     }
 
-    @Override
-    protected PerfilResponse construirDto(Perfil perfil) {
+    private PerfilResponse construirDto(Perfil perfil) {
         return ModelMapperUtil.map(perfil, PerfilResponse.class);
-    }
-
-    @Override
-    protected void ativar(Perfil perfil) {
-        perfil.ativar();
-    }
-
-    @Override
-    protected void desativar(Perfil perfil) {
-        perfil.desativar();
-    }
-
-    @Override
-    public void apagar(Long id) {
-        validarExclusao(id);
-        super.apagar(id);
     }
 
     private void validarExclusao(Long id) {

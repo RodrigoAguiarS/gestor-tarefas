@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -100,9 +101,13 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, UsuarioForm,
     }
 
     private void configurarPerfis(Usuario usuario, Long perfilId) {
-        PerfilResponse perfilResponse = perfilService.obterPorId(perfilId);
-        Perfil perfil = ModelMapperUtil.map(perfilResponse, Perfil.class);
-        usuario.setPerfis(Collections.singleton(perfil));
+        Optional<PerfilResponse> perfilResponse = perfilService.consultarPorId(perfilId);
+        if (perfilResponse.isPresent()) {
+            Perfil perfil = ModelMapperUtil.map(perfilResponse.get(), Perfil.class);
+            usuario.setPerfis(Collections.singleton(perfil));
+        } else {
+            throw new ObjetoNaoEncontradoException(MensagensError.PERFIL_NAO_ENCONTRADO.getMessage(perfilId));
+        }
     }
 
     @Override
