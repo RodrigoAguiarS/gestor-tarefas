@@ -14,6 +14,7 @@ import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -73,11 +74,13 @@ public class TarefaServiceImpl implements ITarefa {
     }
 
     @Override
+    @Cacheable("tarefas")
     public Optional<TarefaResponse> consultarPorId(Long id) {
         return tarefaRepository.findById(id).map(this::construirDto);
     }
 
     @Override
+    @Cacheable("tarefas")
     public Page<TarefaResponse> listarTodos(int page, int size, String sort, Long id, String titulo,
                                             String descricao, Situacao situacao, Prioridade prioridade, Long responsavelId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));

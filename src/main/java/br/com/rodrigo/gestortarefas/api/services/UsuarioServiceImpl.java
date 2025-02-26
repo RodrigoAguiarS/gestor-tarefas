@@ -12,6 +12,7 @@ import br.com.rodrigo.gestortarefas.api.model.response.UsuarioResponse;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -71,6 +72,7 @@ public class UsuarioServiceImpl implements IUsuario {
     }
 
     @Override
+    @Cacheable("usuarios")
     public Page<UsuarioResponse> listarTodos(Pageable pageable) {
         Page<Usuario> usuarios = usuarioRepository.findAll(pageable);
         return usuarios.map(usuario -> ModelMapperUtil.map(usuario, UsuarioResponse.class));
