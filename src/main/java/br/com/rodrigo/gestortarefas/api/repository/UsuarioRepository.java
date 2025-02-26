@@ -2,12 +2,14 @@ package br.com.rodrigo.gestortarefas.api.repository;
 
 
 import br.com.rodrigo.gestortarefas.api.model.Usuario;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 
 import java.util.Optional;
 
@@ -44,4 +46,17 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
                           @Param("cpf") String cpf,
                           @Param("perfilId") Long perfilId,
                           Pageable pageable);
+
+    @Override
+    @CacheEvict(value = "usuarios", allEntries = true)
+    @NonNull
+    <S extends Usuario> S save(@NonNull S entity);
+
+    @Override
+    @CacheEvict(value = "usuarios", allEntries = true)
+    void deleteById(@NonNull Long id);
+
+    @Override
+    @CacheEvict(value = "usuarios", allEntries = true)
+    void delete(@NonNull Usuario entity);
 }
