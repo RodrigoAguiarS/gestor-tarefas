@@ -3,6 +3,7 @@ package br.com.rodrigo.gestortarefas.api.repository;
 import br.com.rodrigo.gestortarefas.api.model.Prioridade;
 import br.com.rodrigo.gestortarefas.api.model.Situacao;
 import br.com.rodrigo.gestortarefas.api.model.Tarefa;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,7 @@ import java.util.List;
 public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
 
 
+    @Cacheable("tarefas")
     @Query("SELECT t FROM Tarefa t " +
             "JOIN t.responsavel r " +
             "WHERE (:id IS NULL OR t.id = :id) " +
@@ -31,11 +33,14 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
                          @Param("responsavelId") Long responsavelId,
                          Pageable pageable);
 
+    @Cacheable("tarefas")
     List<Tarefa> findAllByResponsavelId(@Param("responsavelId") Long id);
 
+    @Cacheable("tarefas")
     @Query("SELECT t.situacao, COUNT(t) FROM Tarefa t GROUP BY t.situacao")
     List<Object[]> countTarefasBySituacao();
 
+    @Cacheable("tarefas")
     @Query("SELECT u, COUNT(t) FROM Usuario u LEFT JOIN Tarefa t ON u.id = t.responsavel.id AND t.situacao = 'CONCLUIDA' GROUP BY u ORDER BY COUNT(t) DESC")
     List<Object[]> findTop10UsuariosComTarefasConcluidas(Pageable pageable);
 

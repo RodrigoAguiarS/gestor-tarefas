@@ -2,6 +2,7 @@ package br.com.rodrigo.gestortarefas.api.repository;
 
 
 import br.com.rodrigo.gestortarefas.api.model.Usuario;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,18 +13,25 @@ import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
+    @Cacheable("usuarios")
     Optional<Usuario> findByEmailIgnoreCase(String email);
 
+    @Cacheable("usuarios")
     Boolean existsByEmailIgnoreCase(String email);
 
+    @Cacheable("usuarios")
     Boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
 
+    @Cacheable("usuarios")
     Boolean existsByPessoaCpf(String cpf);
 
+    @Cacheable("usuarios")
     Boolean existsByPessoaCpfAndIdNot(String cpf, Long id);
 
+    @Cacheable("usuarios")
     boolean existsByPerfisId(Long idPerfil);
 
+    @Cacheable("usuarios")
     @Query("SELECT u FROM Usuario u " +
             "JOIN u.pessoa p " +
             "JOIN u.perfis pf " +
