@@ -43,8 +43,13 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
     List<Object[]> countTarefasBySituacao();
 
     @Cacheable("tarefas")
-    @Query("SELECT u, COUNT(t) FROM Usuario u LEFT JOIN Tarefa t ON u.id = t.responsavel.id AND t.situacao = 'CONCLUIDA' GROUP BY u ORDER BY COUNT(t) DESC")
-    List<Object[]> findTop10UsuariosComTarefasConcluidas(Pageable pageable);
+    @Query("SELECT u, " +
+            "SUM(CASE WHEN t.situacao = 'CONCLUIDA' THEN 1 ELSE 0 END) AS concluidas, " +
+            "SUM(CASE WHEN t.situacao = 'PENDENTE' THEN 1 ELSE 0 END) AS pendentes, " +
+            "SUM(CASE WHEN t.situacao = 'EM_ANDAMENTO' THEN 1 ELSE 0 END) AS emAndamento " +
+            "FROM Usuario u LEFT JOIN Tarefa t ON u.id = t.responsavel.id " +
+            "GROUP BY u ORDER BY concluidas DESC")
+    List<Object[]> findTop10UsuariosComTarefasPorSituacao(Pageable pageable);
 
     @Override
     @CacheEvict(value = "tarefas", allEntries = true)
