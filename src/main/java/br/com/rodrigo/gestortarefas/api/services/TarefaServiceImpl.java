@@ -129,11 +129,13 @@ public class TarefaServiceImpl implements ITarefa {
 
     public List<UsuarioComTarefasConcluidasResponse> listarTop10UsuariosComTarefasConcluidas() {
         Pageable pageable = PageRequest.of(0, 10);
-        List<Object[]> resultados = tarefaRepository.findTop10UsuariosComTarefasConcluidas(pageable);
+        List<Object[]> resultados = tarefaRepository.findTop10UsuariosComTarefasPorSituacao(pageable);
         return resultados.stream()
                 .map(resultado -> new UsuarioComTarefasConcluidasResponse(
                         ModelMapperUtil.map((Usuario) resultado[0], UsuarioResponse.class),
-                        (Long) resultado[1]
+                        (Long) resultado[1],
+                        (Long) resultado[2],
+                        (Long) resultado[3]
                 ))
                 .collect(Collectors.toList());
     }

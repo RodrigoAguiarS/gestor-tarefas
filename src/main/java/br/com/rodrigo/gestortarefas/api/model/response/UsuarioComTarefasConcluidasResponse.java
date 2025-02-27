@@ -13,5 +13,7 @@ public class UsuarioComTarefasConcluidasResponse {
 
     private UsuarioResponse usuario;
     private Long quantidadeTarefasConcluidas;
+    private Long quantidadeTarefasPendentes;
+    private Long quantidadeTarefasEmAndamento;
 
 }
