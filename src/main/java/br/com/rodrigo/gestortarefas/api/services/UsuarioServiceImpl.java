@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class UsuarioServiceImpl implements IUsuario {
 
     private final PasswordEncoder passwordEncoder;
-    private final PerfilServiceImpl perfilService;
+    private final IPerfil perfilService;
     private final SmsService smsService;
     private final UsuarioRepository usuarioRepository;
 

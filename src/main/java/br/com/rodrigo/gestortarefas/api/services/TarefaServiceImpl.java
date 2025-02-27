@@ -2,6 +2,7 @@ package br.com.rodrigo.gestortarefas.api.services;
 
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
+import br.com.rodrigo.gestortarefas.api.model.Notificacao;
 import br.com.rodrigo.gestortarefas.api.model.Prioridade;
 import br.com.rodrigo.gestortarefas.api.model.Situacao;
 import br.com.rodrigo.gestortarefas.api.model.Tarefa;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,11 +37,16 @@ public class TarefaServiceImpl implements ITarefa {
 
     private final UsuarioRepository usuarioRepository;
     private final TarefaRepository tarefaRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final NotificacaoService notificacaoService;
 
     @Override
     public TarefaResponse criar(TarefaForm tarefaForm) {
         Tarefa tarefa = criarEntidade(tarefaForm, null);
         tarefa = tarefaRepository.save(tarefa);
+        String mensagem = "Nova tarefa atribuída a você: " + tarefa.getTitulo();
+        Notificacao notificacao = notificacaoService.criarNotificacao(tarefa.getResponsavel(), mensagem);
+        messagingTemplate.convertAndSend("/topic/notificacoes", notificacao);
         return construirDto(tarefa);
     }
 
