@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/sms")
 @RequiredArgsConstructor
-public class SmsController {
+public class SmsController extends ControllerBase<String> {
 
     private final SmsService smsService;
 
     @PostMapping("/enviar")
     public ResponseEntity<String> sendSms(@RequestParam String to, @RequestParam String message) {
         String response = smsService.enviarSms(to, message);
-        return ResponseEntity.ok(response);
+        return responderItemCriado(response);
     }
 }
