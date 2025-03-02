@@ -26,7 +26,8 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
             "AND (:situacao IS NULL OR t.situacao = :situacao) " +
             "AND (:prioridade IS NULL OR t.prioridade = :prioridade) " +
             "AND (:responsavelId IS NULL OR r.id = :responsavelId) " +
-            "AND t.situacao <> 'CONCLUIDA'")
+            "AND t.situacao <> 'CONCLUIDA' " +
+            "ORDER BY t.criadoEm DESC")
     Page<Tarefa> findAll(@Param("id") Long id,
                          @Param("titulo") String titulo,
                          @Param("descricao") String descricao,
