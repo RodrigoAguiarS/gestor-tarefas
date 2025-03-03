@@ -5,10 +5,8 @@ import br.com.rodrigo.gestortarefas.api.model.Prioridade;
 import br.com.rodrigo.gestortarefas.api.model.Situacao;
 import br.com.rodrigo.gestortarefas.api.model.Tarefa;
 import br.com.rodrigo.gestortarefas.api.model.Usuario;
-import br.com.rodrigo.gestortarefas.api.model.form.TarefaForm;
 import br.com.rodrigo.gestortarefas.api.model.response.TarefaResponse;
 import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
-import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.services.TarefaServiceImpl;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +19,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.Collections;
 import java.util.List;
@@ -79,7 +76,7 @@ class TarefaServiceImplTest {
     @Test
     void deveListarTodos() {
         Page<Tarefa> page = new PageImpl<>(Collections.singletonList(tarefa));
-        when(tarefaRepository.findAll(any(), any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(page);
+        when(tarefaRepository.findAll(any(), any(), any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(page);
         Page<TarefaResponse> responses = tarefaService.listarTodos(0, 10, "id", null, null, null, null, null, null);
         assertNotNull(responses);
         assertFalse(responses.isEmpty());
