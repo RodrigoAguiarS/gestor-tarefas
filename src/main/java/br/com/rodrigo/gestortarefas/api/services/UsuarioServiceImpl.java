@@ -34,7 +34,6 @@ public class UsuarioServiceImpl implements IUsuario {
 
     private final PasswordEncoder passwordEncoder;
     private final IPerfil perfilService;
-    private final SmsService smsService;
     private final UsuarioRepository usuarioRepository;
 
     @Override
@@ -80,7 +79,6 @@ public class UsuarioServiceImpl implements IUsuario {
 
     private Usuario criarEntidade(UsuarioForm usuarioForm, Long id) {
         verificarUnicidadeEmailCpf(usuarioForm.getEmail(), usuarioForm.getCpf(), id);
-        smsService.enviarSenhaSms("+55" + usuarioForm.getTelefone(), usuarioForm.getSenha());
         Usuario usuario = buscarOuCriarUsuario(id);
         mapearDadosUsuario(usuarioForm, usuario);
         configurarPerfis(usuario, usuarioForm.getPerfil());

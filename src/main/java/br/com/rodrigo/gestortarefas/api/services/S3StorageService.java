@@ -8,6 +8,8 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Response;
 
@@ -35,7 +37,7 @@ public class S3StorageService {
                 .build();
     }
 
-    public String uploadFile(MultipartFile file) throws IOException {
+    public String uploadArquivo(MultipartFile file) throws IOException {
         String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -52,6 +54,21 @@ public class S3StorageService {
         } else {
             throw new RuntimeException("Erro ao fazer upload para o S3");
 
+        }
+    }
+
+    public void apagarArquivo(String fileUrl) {
+        String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(fileName)
+                .build();
+
+        DeleteObjectResponse response = s3Client.deleteObject(deleteObjectRequest);
+
+        if (!response.sdkHttpResponse().isSuccessful()) {
+            throw new RuntimeException("Erro ao deletar o arquivo do S3");
         }
     }
 }

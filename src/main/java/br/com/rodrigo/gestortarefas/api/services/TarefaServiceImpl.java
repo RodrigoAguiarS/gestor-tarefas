@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 
 @Service
@@ -39,6 +40,7 @@ public class TarefaServiceImpl implements ITarefa {
     private final TarefaRepository tarefaRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificacaoService notificacaoService;
+    private final S3StorageService s3StorageService;
 
     @Override
     public TarefaResponse criar(TarefaForm tarefaForm) {
@@ -60,6 +62,7 @@ public class TarefaServiceImpl implements ITarefa {
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(form.getResponsavel())));
         tarefa.setResponsavel(responsavel);
+        tarefa.setArquivosUrl(form.getArquivosUrl());
         return tarefa;
     }
 
@@ -77,6 +80,13 @@ public class TarefaServiceImpl implements ITarefa {
     public void deletar(Long id) {
         Tarefa tarefa = tarefaRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.TAREFA_NAO_ENCONTRADA_POR_ID.getMessage(id)));
+
+        if (isNotEmpty(tarefa.getArquivosUrl())) {
+            for (String fileUrl : tarefa.getArquivosUrl()) {
+                s3StorageService.apagarArquivo(fileUrl);
+            }
+        }
+
         tarefaRepository.delete(tarefa);
     }
 
@@ -91,7 +101,7 @@ public class TarefaServiceImpl implements ITarefa {
     public Page<TarefaResponse> listarTodos(int page, int size, String sort, Long id, String titulo,
                                             String descricao, Situacao situacao, Prioridade prioridade, Long responsavelId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));
-        Page<Tarefa> tarefas = tarefaRepository.findAll(id, titulo, descricao, situacao, prioridade, responsavelId, pageable);
+        Page<Tarefa> tarefas = tarefaRepository.findAll(id, titulo, descricao, situacao, prioridade, responsavelId, Situacao.CONCLUIDA, pageable);
         return tarefas.map(tarefa -> ModelMapperUtil.map(tarefa, TarefaResponse.class));
     }
 
