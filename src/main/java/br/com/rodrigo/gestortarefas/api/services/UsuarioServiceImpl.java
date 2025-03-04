@@ -9,6 +9,7 @@ import br.com.rodrigo.gestortarefas.api.model.Usuario;
 import br.com.rodrigo.gestortarefas.api.model.form.UsuarioForm;
 import br.com.rodrigo.gestortarefas.api.model.response.PerfilResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.UsuarioResponse;
+import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class UsuarioServiceImpl implements IUsuario {
     private final PasswordEncoder passwordEncoder;
     private final IPerfil perfilService;
     private final UsuarioRepository usuarioRepository;
+    private final TarefaRepository tarefaRepository;
 
     @Override
     public UsuarioResponse criar(UsuarioForm usuarioForm) {
@@ -54,6 +56,7 @@ public class UsuarioServiceImpl implements IUsuario {
     public void deletar(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(id)));
+        verifcarTarefaVinculadoUsuario(usuario.getId());
         usuarioRepository.delete(usuario);
     }
 
@@ -146,6 +149,12 @@ public class UsuarioServiceImpl implements IUsuario {
             if (usuarioRepository.existsByPessoaCpfAndIdNot(cpf, id)) {
                 throw new ViolacaoIntegridadeDadosException(MensagensError.CPF_JA_CADASTRADO.getMessage(cpf));
             }
+        }
+    }
+
+    private void verifcarTarefaVinculadoUsuario(Long idUsuario) {
+        if (tarefaRepository.existsByResponsavelId(idUsuario)) {
+            throw new ViolacaoIntegridadeDadosException(MensagensError.USUARIO_POSSUI_TAREFA.getMessage());
         }
     }
 

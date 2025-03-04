@@ -53,6 +53,9 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
             "GROUP BY u ORDER BY concluidas DESC")
     List<Object[]> findTop10UsuariosComTarefasPorSituacao(Pageable pageable);
 
+    @Cacheable("tarefas")
+    boolean existsByResponsavelId(Long usuarioId);
+
     @Override
     @CacheEvict(value = "tarefas", allEntries = true)
     @NonNull
