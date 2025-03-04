@@ -34,6 +34,76 @@ Este projeto é uma API para gestão de tarefas, desenvolvida utilizando Java, S
 - **Listagem dos top 10 usuários com mais tarefas concluídas**
 - **Segurança**: Implementação robusta com autenticação via JWT.
 
+```mermaid
+classDiagram
+    class EntidadeBase {
+        <<abstract>>
+        Long id
+        LocalDateTime dataCriacao
+        LocalDateTime dataAtualizacao
+    }
+
+    class Usuario {
+        String email
+        String senha
+        Collection~GrantedAuthority~ authorities
+        Set~Perfil~ perfis
+        Pessoa pessoa
+        +Collection~GrantedAuthority~ getAuthorities()
+        +String getPassword()
+        +String getUsername()
+    }
+
+    class Pessoa {
+        String nome
+        String telefone
+        String cpf
+        LocalDate dataNascimento
+    }
+
+    class Perfil {
+        static Long ADMINSTRADOR
+        static Long OPERADOR
+        String nome
+        String descricao
+    }
+
+    class Tarefa {
+        String titulo
+        String descricao
+        Usuario responsavel
+        Prioridade prioridade
+        LocalDate deadline
+        Situacao situacao
+        List~String~ arquivosUrl
+    }
+
+    class Situacao {
+        <<enumeration>>
+        PENDENTE
+        EM_ANDAMENTO
+        CONCLUIDA
+    }
+
+    class Prioridade {
+        <<enumeration>>
+        ALTA
+        MEDIA
+        BAIXA
+    }
+
+    EntidadeBase <|-- Usuario
+    EntidadeBase <|-- Pessoa
+    EntidadeBase <|-- Perfil
+    EntidadeBase <|-- Tarefa
+    Usuario "1" -- "1" Pessoa
+    Usuario "1" -- "0..*" Tarefa : responsavel
+    Usuario "0..*" -- "0..*" Perfil : perfis
+
+```
+
+ 
+
 ## ⚙️ Configuração
 
 1. Configure o banco de dados no arquivo `application.properties`:
