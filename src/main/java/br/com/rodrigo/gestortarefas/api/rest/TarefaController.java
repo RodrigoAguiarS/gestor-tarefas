@@ -5,7 +5,7 @@ import br.com.rodrigo.gestortarefas.api.model.Situacao;
 import br.com.rodrigo.gestortarefas.api.model.form.TarefaForm;
 import br.com.rodrigo.gestortarefas.api.model.response.TarefaResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.UsuarioComTarefasConcluidasResponse;
-import br.com.rodrigo.gestortarefas.api.services.TarefaServiceImpl;
+import br.com.rodrigo.gestortarefas.api.services.impl.TarefaServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

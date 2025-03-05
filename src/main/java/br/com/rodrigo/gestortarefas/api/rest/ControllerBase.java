@@ -50,6 +50,10 @@ public abstract class ControllerBase<T> {
         return ResponseEntity.badRequest().build();
     }
 
+    protected ResponseEntity<Void> responderRequisicaoMalSucedidaSemConteudo() {
+        return ResponseEntity.badRequest().build();
+    }
+
     protected ResponseEntity<Page<T>> responderListaDeItensPaginada(Page<T> itens) {
         return ResponseEntity.status(HttpStatus.OK).body(itens);
     }

@@ -1,4 +1,4 @@
-package br.com.rodrigo.gestortarefas.api.services;
+package br.com.rodrigo.gestortarefas.api.services.impl;
 
 
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
@@ -8,6 +8,7 @@ import br.com.rodrigo.gestortarefas.api.model.form.PerfilForm;
 import br.com.rodrigo.gestortarefas.api.model.response.PerfilResponse;
 import br.com.rodrigo.gestortarefas.api.repository.PerfilRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
+import br.com.rodrigo.gestortarefas.api.services.IPerfil;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

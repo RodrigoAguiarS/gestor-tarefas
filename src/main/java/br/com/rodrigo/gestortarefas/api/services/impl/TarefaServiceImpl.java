@@ -1,18 +1,20 @@
-package br.com.rodrigo.gestortarefas.api.services;
+package br.com.rodrigo.gestortarefas.api.services.impl;
 
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
-import br.com.rodrigo.gestortarefas.api.model.Notificacao;
 import br.com.rodrigo.gestortarefas.api.model.Prioridade;
 import br.com.rodrigo.gestortarefas.api.model.Situacao;
 import br.com.rodrigo.gestortarefas.api.model.Tarefa;
 import br.com.rodrigo.gestortarefas.api.model.Usuario;
 import br.com.rodrigo.gestortarefas.api.model.form.TarefaForm;
+import br.com.rodrigo.gestortarefas.api.model.response.NotificacaoResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.TarefaResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.UsuarioComTarefasConcluidasResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.UsuarioResponse;
 import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
+import br.com.rodrigo.gestortarefas.api.services.ITarefa;
+import br.com.rodrigo.gestortarefas.api.services.S3StorageService;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,15 +41,15 @@ public class TarefaServiceImpl implements ITarefa {
     private final UsuarioRepository usuarioRepository;
     private final TarefaRepository tarefaRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final NotificacaoService notificacaoService;
+    private final NotificacaoServiceImpl notificacaoServiceImpl;
     private final S3StorageService s3StorageService;
 
     @Override
     public TarefaResponse criar(TarefaForm tarefaForm) {
         Tarefa tarefa = criarEntidade(tarefaForm, null);
         tarefa = tarefaRepository.save(tarefa);
-        String mensagem = "Nova tarefa atribuída a você: " + tarefa.getTitulo();
-        Notificacao notificacao = notificacaoService.criarNotificacao(tarefa.getResponsavel(), mensagem);
+        String mensagem = criarMensagemTarefa(tarefa);
+        NotificacaoResponse notificacao = notificacaoServiceImpl.criarNotificacao(tarefa.getResponsavel(), mensagem);
         messagingTemplate.convertAndSend("/topic/notificacoes", notificacao);
         return construirDto(tarefa);
     }
@@ -71,8 +73,13 @@ public class TarefaServiceImpl implements ITarefa {
         Tarefa tarefaExistente = tarefaRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.TAREFA_NAO_ENCONTRADA_POR_ID.getMessage(id)));
 
+        Usuario antigoResponsavel = tarefaExistente.getResponsavel();
         criarEntidade(form, tarefaExistente);
         tarefaExistente = tarefaRepository.save(tarefaExistente);
+        String mensagem = criarMensagemTarefa(tarefaExistente);
+        NotificacaoResponse notificacao = notificacaoServiceImpl.criarNotificacao(tarefaExistente.getResponsavel(), mensagem);
+        messagingTemplate.convertAndSend("/topic/notificacoes", notificacao);
+        notificarMudancaResponsavel(tarefaExistente, antigoResponsavel);
         return construirDto(tarefaExistente);
     }
 
@@ -152,5 +159,18 @@ public class TarefaServiceImpl implements ITarefa {
 
     protected TarefaResponse construirDto(Tarefa tarefa) {
         return ModelMapperUtil.map(tarefa, TarefaResponse.class);
+    }
+
+    private String criarMensagemTarefa(Tarefa tarefa) {
+        return String.format("Informações da tarefa:\nCódigo: %d\nTitulo: %s\nDescrição: %s\nPrioridade: %s",
+                tarefa.getId(), tarefa.getTitulo(), tarefa.getDescricao(), tarefa.getPrioridade());
+    }
+
+    private void notificarMudancaResponsavel(Tarefa tarefaExistente, Usuario antigoResponsavel) {
+        if (!antigoResponsavel.equals(tarefaExistente.getResponsavel())) {
+            String mensagemMudancaResponsavel = String.format("Informação sobre mudança de Responsável:\nCódigo: %d\nTítulo: %s\nDescrição: %s\nNovo Responsável: %s",
+                    tarefaExistente.getId(), tarefaExistente.getTitulo(), tarefaExistente.getDescricao(), tarefaExistente.getResponsavel().getPessoa().getNome());
+            notificacaoServiceImpl.criarNotificacao(antigoResponsavel, mensagemMudancaResponsavel);
+        }
     }
 }

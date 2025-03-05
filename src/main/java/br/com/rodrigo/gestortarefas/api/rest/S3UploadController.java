@@ -33,9 +33,9 @@ public class S3UploadController extends ControllerBase<Map<String, String>> {
     public ResponseEntity<Void> deleteImage(@PathVariable String fileName) {
         try {
             s3StorageService.apagarArquivo(fileName);
-            return ResponseEntity.noContent().build();
+            return responderSemConteudo();
         } catch (RuntimeException e) {
-            return ResponseEntity.status(500).build();
+            return responderRequisicaoMalSucedidaSemConteudo();
         }
     }
 }

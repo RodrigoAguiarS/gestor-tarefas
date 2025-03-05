@@ -1,4 +1,4 @@
-package br.com.rodrigo.gestortarefas.api.services;
+package br.com.rodrigo.gestortarefas.api.services.impl;
 
 import br.com.rodrigo.gestortarefas.api.auth.ImpersonateAuthenticationToken;
 import br.com.rodrigo.gestortarefas.api.auth.JwtService;
@@ -7,6 +7,7 @@ import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.model.Usuario;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
+import br.com.rodrigo.gestortarefas.api.services.Impersonate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

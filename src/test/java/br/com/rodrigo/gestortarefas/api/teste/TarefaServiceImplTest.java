@@ -7,7 +7,7 @@ import br.com.rodrigo.gestortarefas.api.model.Tarefa;
 import br.com.rodrigo.gestortarefas.api.model.Usuario;
 import br.com.rodrigo.gestortarefas.api.model.response.TarefaResponse;
 import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
-import br.com.rodrigo.gestortarefas.api.services.TarefaServiceImpl;
+import br.com.rodrigo.gestortarefas.api.services.impl.TarefaServiceImpl;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
