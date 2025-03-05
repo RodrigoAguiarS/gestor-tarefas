@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -31,9 +30,6 @@ public class TarefaForm {
 
     @NotNull
     private Prioridade prioridade;
-
-    @NotNull
-    private LocalDate deadline;
 
     private List<String> arquivosUrl;
 }

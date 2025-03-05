@@ -25,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,6 +64,7 @@ public class TarefaServiceImpl implements ITarefa {
         Usuario responsavel = usuarioRepository.findById(form.getResponsavel())
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(form.getResponsavel())));
+        tarefa.setDeadline(calcularDeadline(form.getPrioridade()));
         tarefa.setResponsavel(responsavel);
         tarefa.setArquivosUrl(form.getArquivosUrl());
         return tarefa;
@@ -76,6 +78,7 @@ public class TarefaServiceImpl implements ITarefa {
         Usuario antigoResponsavel = tarefaExistente.getResponsavel();
         criarEntidade(form, tarefaExistente);
         tarefaExistente = tarefaRepository.save(tarefaExistente);
+        tarefaExistente.setDeadline(calcularDeadline(form.getPrioridade()));
         String mensagem = criarMensagemTarefa(tarefaExistente);
         NotificacaoResponse notificacao = notificacaoServiceImpl.criarNotificacao(tarefaExistente.getResponsavel(), mensagem);
         messagingTemplate.convertAndSend("/topic/notificacoes", notificacao);
@@ -172,5 +175,13 @@ public class TarefaServiceImpl implements ITarefa {
                     tarefaExistente.getId(), tarefaExistente.getTitulo(), tarefaExistente.getDescricao(), tarefaExistente.getResponsavel().getPessoa().getNome());
             notificacaoServiceImpl.criarNotificacao(antigoResponsavel, mensagemMudancaResponsavel);
         }
+    }
+
+    private LocalDate calcularDeadline(Prioridade prioridade) {
+        return switch (prioridade) {
+            case ALTA -> LocalDate.now().plusDays(2);
+            case MEDIA -> LocalDate.now().plusDays(5);
+            case BAIXA -> LocalDate.now().plusDays(7);
+        };
     }
 }

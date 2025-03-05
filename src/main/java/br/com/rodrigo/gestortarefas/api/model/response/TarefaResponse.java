@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -22,6 +23,7 @@ public class TarefaResponse {
     private UsuarioResponse responsavel;
     private Prioridade prioridade;
     private LocalDate deadline;
+    private LocalDateTime criadoEm;
     private Situacao situacao;
     private List<String> arquivosUrl;
 }
