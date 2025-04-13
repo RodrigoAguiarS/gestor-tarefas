@@ -5,6 +5,7 @@ public enum MensagensError {
     // Geral
     USUARIO_NAO_ENCONTRADO_POR_LOGIN("Usuário não encontrado para o login %s"),
     PERFIL_POSSUI_USUARIO("Perfil não pode ser apagado, está vinculado a um usuário"),
+    CATEGORIA_POSSUI_PRODUTO("Categoria não pode ser apagado, está vinculado a um produto"),
     USUARIO_POSSUI_TAREFA("Usuário não pode ser apagado, está vinculado a uma tarefa"),
     TAREFA_NAO_ENCONTRADA_POR_ID("Tarefa não encontrada para o id %s"),
     SMS_ENVIADO_SUCESSO("SMS enviado com sucesso! ID: %s"),
