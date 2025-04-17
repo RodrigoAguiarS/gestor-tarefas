@@ -47,7 +47,7 @@ public class Usuario extends EntidadeBase implements UserDetails {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_pessoa")
-    private Pessoa pessoa;
+    private Pessoa pessoa = new Pessoa();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -4,7 +4,6 @@ import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
 import br.com.rodrigo.gestortarefas.api.model.Perfil;
-import br.com.rodrigo.gestortarefas.api.model.Pessoa;
 import br.com.rodrigo.gestortarefas.api.model.Usuario;
 import br.com.rodrigo.gestortarefas.api.model.form.UsuarioForm;
 import br.com.rodrigo.gestortarefas.api.model.response.PerfilResponse;
@@ -72,50 +71,42 @@ public class UsuarioServiceImpl implements IUsuario {
                                         String nome, String cpf, Long perfilId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));
         Page<Usuario> usuarios = usuarioRepository.findAll(email, nome, cpf, perfilId, pageable);
-        return usuarios.map(usuario -> ModelMapperUtil.map(usuario, UsuarioResponse.class));
+        return usuarios.map(this::construirDto);
     }
 
     @Override
     @Cacheable("usuarios")
     public Page<UsuarioResponse> listarTodos(Pageable pageable) {
         Page<Usuario> usuarios = usuarioRepository.findAll(pageable);
-        return usuarios.map(usuario -> ModelMapperUtil.map(usuario, UsuarioResponse.class));
+        return usuarios.map(this::construirDto);
     }
 
     private Usuario criarEntidade(UsuarioForm usuarioForm, Long id) {
         verificarUnicidadeEmailCpf(usuarioForm.getEmail(), usuarioForm.getCpf(), id);
-        Usuario usuario = buscarOuCriarUsuario(id);
-        mapearDadosUsuario(usuarioForm, usuario);
-        configurarPerfis(usuario, usuarioForm.getPerfil());
-        return usuario;
-    }
 
-    private Usuario buscarOuCriarUsuario(Long id) {
-        return (id != null) ? usuarioRepository.findById(id)
-                .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(id)))
-                : new Usuario();
-    }
+        Usuario usuario = id == null ? new Usuario() : usuarioRepository.findById(id)
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(id)));
 
-    private void mapearDadosUsuario(UsuarioForm usuarioForm, Usuario usuario) {
-        ModelMapperUtil.map(usuarioForm, usuario);
-        usuario.setSenha(passwordEncoder.encode(usuarioForm.getSenha()));
+        Optional<PerfilResponse> perfilResponse = perfilService.consultarPorId(usuarioForm.getPerfil());
 
-        if (usuario.getPessoa() == null) {
-            usuario.setPessoa(new Pessoa());
-        }
-
-        ModelMapperUtil.map(usuarioForm, usuario.getPessoa());
-    }
-
-    private void configurarPerfis(Usuario usuario, Long perfilId) {
-        Optional<PerfilResponse> perfilResponse = perfilService.consultarPorId(perfilId);
-        if (perfilResponse.isPresent()) {
-            Perfil perfil = ModelMapperUtil.map(perfilResponse.get(), Perfil.class);
+        if(perfilResponse.isPresent()) {
+            Perfil perfil = new Perfil();
+            perfil.setId(perfilResponse.get().getId());
+            perfil.setNome(perfilResponse.get().getNome());
+            perfil.setDescricao(perfilResponse.get().getDescricao());
             usuario.setPerfis(Collections.singleton(perfil));
         } else {
-            throw new ObjetoNaoEncontradoException(MensagensError.PERFIL_NAO_ENCONTRADO.getMessage(perfilId));
+            throw new ObjetoNaoEncontradoException(MensagensError.PERFIL_NAO_ENCONTRADO.getMessage(usuarioForm.getPerfil()));
         }
+
+        usuario.setSenha(passwordEncoder.encode(usuarioForm.getSenha()));
+        usuario.setEmail(usuarioForm.getEmail());
+        usuario.getPessoa().setNome(usuarioForm.getNome());
+        usuario.getPessoa().setCpf(usuarioForm.getCpf());
+        usuario.getPessoa().setDataNascimento(usuarioForm.getDataNascimento());
+        usuario.getPessoa().setTelefone(usuarioForm.getTelefone());
+
+        return usuario;
     }
 
     @Override
@@ -161,6 +152,16 @@ public class UsuarioServiceImpl implements IUsuario {
     }
 
     private UsuarioResponse construirDto(Usuario usuario) {
-        return ModelMapperUtil.map(usuario, UsuarioResponse.class);
+        UsuarioResponse usuarioResponse = new UsuarioResponse();
+        usuarioResponse.setId(usuario.getId());
+        usuarioResponse.setEmail(usuario.getEmail());
+        usuarioResponse.getPessoa().setNome(usuario.getPessoa().getNome());
+        usuarioResponse.getPessoa().setCpf(usuario.getPessoa().getCpf());
+        usuarioResponse.getPessoa().setDataNascimento(usuario.getPessoa().getDataNascimento());
+        usuarioResponse.getPessoa().setTelefone(usuario.getPessoa().getTelefone());
+        usuarioResponse.setPerfis(usuario.getPerfis().stream()
+                .map(perfil -> new PerfilResponse(perfil.getId(), perfil.getNome(), perfil.getDescricao()))
+                .collect(Collectors.toSet()));
+        return usuarioResponse;
     }
 }

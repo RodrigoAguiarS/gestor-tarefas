@@ -14,4 +14,10 @@ public class PerfilResponse {
     private String nome;
     private String descricao;
     private Boolean ativo;
+
+    public PerfilResponse(Long id, String nome, String descricao) {
+        this.id = id;
+        this.nome = nome;
+        this.descricao = descricao;
+    }
 }
