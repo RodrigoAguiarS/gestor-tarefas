@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -130,15 +131,21 @@ class CategoriaServiceImplTest {
 
     @Test
     void listarTodos_DeveRetornarPaginaComCategorias() {
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
         Page<Categoria> categoriasPage = new PageImpl<>(
                 Collections.singletonList(categoria),
                 pageable,
                 1
         );
-        when(categoriaRepository.findAll(pageable)).thenReturn(categoriasPage);
+        doReturn(categoriasPage).when(categoriaRepository).findAll(
+                isNull(),
+                isNull(),
+                isNull(),
+                eq(pageable)
+        );
 
-        Page<CategoriaResponse> resultado = categoriaService.listarTodos(pageable);
+        Page<CategoriaResponse> resultado = categoriaService.listarTodos(0, 10, "id",
+                null, null, null);
 
         assertNotNull(resultado);
         assertFalse(resultado.isEmpty());

@@ -12,7 +12,6 @@ import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.services.IPerfil;
 import br.com.rodrigo.gestortarefas.api.services.IUsuario;
-import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;

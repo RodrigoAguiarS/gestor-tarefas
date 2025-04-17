@@ -17,13 +17,13 @@ import java.time.LocalDate;
 @Entity
 public class Pessoa extends EntidadeBase {
 
-    @Column(name = "nome")
+    @Column(name = "nome", length = 50)
     private String nome;
 
-    @Column(name = "telefone")
+    @Column(name = "telefone", length = 11)
     private String telefone;
 
-    @Column(name = "cpf", unique = true)
+    @Column(name = "cpf", unique = true, length = 13)
     private String cpf;
 
     @Column(name = "data_nascimento")

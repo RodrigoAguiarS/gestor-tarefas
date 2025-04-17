@@ -10,7 +10,9 @@ import br.com.rodrigo.gestortarefas.api.repository.ProdutoRepository;
 import br.com.rodrigo.gestortarefas.api.services.ICategoria;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -69,8 +71,10 @@ public class CategoriaServiceImpl implements ICategoria {
     }
 
     @Override
-    public Page<CategoriaResponse> listarTodos(Pageable pageable) {
-        Page<Categoria> categorias = categoriaRepository.findAll(pageable);
+    public Page<CategoriaResponse> listarTodos(int page, int size, String sort, Long id, String nome,
+                                               String descricao) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));
+        Page<Categoria> categorias = categoriaRepository.findAll(id, nome, descricao, pageable);
         return categorias.map(this::construirDto);
     }
 
