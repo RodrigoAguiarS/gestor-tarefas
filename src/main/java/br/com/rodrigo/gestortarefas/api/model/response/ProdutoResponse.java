@@ -5,19 +5,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PerfilResponse {
+public class ProdutoResponse {
+
     private Long id;
     private String nome;
     private String descricao;
-    private Boolean ativo;
-
-    public PerfilResponse(Long id, String nome, String descricao) {
-        this.id = id;
-        this.nome = nome;
-        this.descricao = descricao;
-    }
+    private String codigoBarras;
+    private Integer quantidade;
+    private BigDecimal preco;
+    private CategoriaResponse categoria;
+    private List<String> arquivosUrl;
 }

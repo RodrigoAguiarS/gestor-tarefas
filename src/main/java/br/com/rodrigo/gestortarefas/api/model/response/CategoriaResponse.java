@@ -5,19 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PerfilResponse {
+public class CategoriaResponse {
     private Long id;
     private String nome;
     private String descricao;
-    private Boolean ativo;
-
-    public PerfilResponse(Long id, String nome, String descricao) {
-        this.id = id;
-        this.nome = nome;
-        this.descricao = descricao;
-    }
 }

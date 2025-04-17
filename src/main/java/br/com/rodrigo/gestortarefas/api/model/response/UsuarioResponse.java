@@ -14,6 +14,6 @@ import java.util.Set;
 public class UsuarioResponse {
     private Long id;
     private String email;
-    private PessoaResponse pessoa;
+    private PessoaResponse pessoa = new PessoaResponse();
     private Set<PerfilResponse> perfis;
 }

@@ -20,7 +20,7 @@ public class Notificacao extends EntidadeBase {
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
-    @Column(name = "mensagem", length = 500, nullable = false)
+    @Column(name = "mensagem", columnDefinition = "TEXT", nullable = false)
     private String mensagem;
 
     private boolean lida;
