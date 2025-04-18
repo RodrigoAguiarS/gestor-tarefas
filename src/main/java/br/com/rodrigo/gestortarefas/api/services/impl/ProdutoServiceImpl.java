@@ -82,9 +82,9 @@ public class ProdutoServiceImpl implements IProduto {
                         MensagensError.PRODUTO_NAO_ENCONTRADO.getMessage(id)));
         validarCodigoBarras(produtoForm.getCodigoBarras(), id);
 
-        CategoriaResponse response = categoriaService.consultarPorId(produtoForm.getCategoria())
+        CategoriaResponse response = categoriaService.consultarPorId(produtoForm.getCategoriaId())
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.CATEGORIA_NAO_ENCONTRADA.getMessage(produtoForm.getCategoria())));
+                        MensagensError.CATEGORIA_NAO_ENCONTRADA.getMessage(produtoForm.getCategoriaId())));
 
         Categoria categoria = new Categoria();
         categoria.setId(response.getId());

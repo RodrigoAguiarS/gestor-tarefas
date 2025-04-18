@@ -37,5 +37,5 @@ public class ProdutoForm {
     private List<String> arquivosUrl;
 
     @NotNull
-    private Long categoria;
+    private Long categoriaId;
 }

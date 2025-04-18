@@ -57,7 +57,7 @@ class ProdutoServiceImplTest {
         produtoForm.setCodigoBarras("123456789");
         produtoForm.setPreco(BigDecimal.valueOf(100.00));
         produtoForm.setQuantidade(10);
-        produtoForm.setCategoria(1L);
+        produtoForm.setCategoriaId(1L);
 
         Categoria categoria = new Categoria();
         categoria.setId(1L);
