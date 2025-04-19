@@ -1,7 +1,6 @@
 package br.com.rodrigo.gestortarefas.api.repository;
 
 import br.com.rodrigo.gestortarefas.api.model.Cliente;
-import br.com.rodrigo.gestortarefas.api.model.Usuario;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -13,9 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -36,7 +34,6 @@ class PagamentoServiceImplTest {
 
     private Pagamento pagamento;
     private PagamentoForm pagamentoForm;
-    private PagamentoResponse pagamentoResponse;
 
     @BeforeEach
     void setUp() {
@@ -51,7 +48,7 @@ class PagamentoServiceImplTest {
         pagamentoForm.setDescricao("Pagamento via cartão");
         pagamentoForm.setPorcentagemAcrescimo(new BigDecimal("5.0"));
 
-        pagamentoResponse = new PagamentoResponse();
+        PagamentoResponse pagamentoResponse = new PagamentoResponse();
         pagamentoResponse.setId(1L);
         pagamentoResponse.setNome("Cartão de Crédito");
         pagamentoResponse.setDescricao("Pagamento via cartão");
@@ -119,7 +116,6 @@ class PagamentoServiceImplTest {
 
     @Test
     void listarTodos_DeveRetornarPaginaDePagamentos() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
         Page<Pagamento> pagamentoPage = new PageImpl<>(List.of(pagamento));
 
         when(pagamentoRepository.findAll(
@@ -138,7 +134,6 @@ class PagamentoServiceImplTest {
 
     @Test
     void listarTodos_QuandoNaoEncontrado_DeveRetornarPaginaVazia() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
         Page<Pagamento> pagamentoPage = Page.empty();
 
         when(pagamentoRepository.findAll(
