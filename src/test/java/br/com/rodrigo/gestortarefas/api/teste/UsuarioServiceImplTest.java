@@ -11,6 +11,7 @@ import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.services.IPerfil;
 import br.com.rodrigo.gestortarefas.api.services.impl.UsuarioServiceImpl;
+import br.com.rodrigo.gestortarefas.api.util.ValidadorUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,9 @@ class UsuarioServiceImplTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private ValidadorUtil validadorUtil;
 
     @Mock
     private TarefaRepository tarefaRepository;
@@ -92,8 +96,8 @@ class UsuarioServiceImplTest {
         when(perfilService.consultarPorId(any())).thenReturn(Optional.of(perfilResponse));
         when(passwordEncoder.encode(any())).thenReturn("encoded_password");
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
-        when(usuarioRepository.existsByEmailIgnoreCase(any())).thenReturn(false);
-        when(usuarioRepository.existsByPessoaCpf(any())).thenReturn(false);
+        doNothing().when(validadorUtil).validarEmailUnico(anyString(), any());
+        doNothing().when(validadorUtil).validarCpfUnico(anyString(), any());
 
         UsuarioResponse resultado = usuarioService.criar(usuarioForm);
 
@@ -102,11 +106,14 @@ class UsuarioServiceImplTest {
         assertEquals(usuario.getEmail(), resultado.getEmail());
         assertEquals(usuario.getPessoa().getNome(), resultado.getPessoa().getNome());
         verify(usuarioRepository, times(1)).save(any(Usuario.class));
+        verify(validadorUtil, times(1)).validarEmailUnico(usuarioForm.getEmail(), null);
+        verify(validadorUtil, times(1)).validarCpfUnico(usuarioForm.getCpf(), null);
     }
 
     @Test
     void criar_QuandoEmailJaExiste_DeveLancarExcecao() {
-        when(usuarioRepository.existsByEmailIgnoreCase(any())).thenReturn(true);
+        doThrow(new ViolacaoIntegridadeDadosException("Email já cadastrado"))
+                .when(validadorUtil).validarEmailUnico(anyString(), any());
 
         assertThrows(ViolacaoIntegridadeDadosException.class,
                 () -> usuarioService.criar(usuarioForm));
@@ -120,8 +127,8 @@ class UsuarioServiceImplTest {
         when(passwordEncoder.encode(any())).thenReturn("encoded_password");
         when(usuarioRepository.findById(id)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
-        when(usuarioRepository.existsByEmailIgnoreCaseAndIdNot(any(), any())).thenReturn(false);
-        when(usuarioRepository.existsByPessoaCpfAndIdNot(any(), any())).thenReturn(false);
+        doNothing().when(validadorUtil).validarEmailUnico(anyString(), any());
+        doNothing().when(validadorUtil).validarCpfUnico(anyString(), any());
 
         UsuarioResponse resultado = usuarioService.atualizar(id, usuarioForm);
 
@@ -129,6 +136,8 @@ class UsuarioServiceImplTest {
         assertEquals(usuario.getId(), resultado.getId());
         assertEquals(usuario.getEmail(), resultado.getEmail());
         verify(usuarioRepository, times(1)).save(any(Usuario.class));
+        verify(validadorUtil, times(1)).validarEmailUnico(usuarioForm.getEmail(), id);
+        verify(validadorUtil, times(1)).validarCpfUnico(usuarioForm.getCpf(), id);
     }
 
     @Test

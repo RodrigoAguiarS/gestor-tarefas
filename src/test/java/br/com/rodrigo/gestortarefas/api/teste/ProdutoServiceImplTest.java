@@ -11,6 +11,7 @@ import br.com.rodrigo.gestortarefas.api.repository.ProdutoRepository;
 import br.com.rodrigo.gestortarefas.api.services.ICategoria;
 import br.com.rodrigo.gestortarefas.api.services.S3StorageService;
 import br.com.rodrigo.gestortarefas.api.services.impl.ProdutoServiceImpl;
+import br.com.rodrigo.gestortarefas.api.util.ValidadorUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +39,9 @@ class ProdutoServiceImplTest {
 
     @Mock
     private ICategoria categoriaService;
+
+    @Mock
+    private ValidadorUtil validadorUtil;
 
     @Mock
     private S3StorageService s3StorageService;
@@ -83,7 +87,7 @@ class ProdutoServiceImplTest {
     void criar_DeveRetornarProdutoCriado() {
         when(categoriaService.consultarPorId(any())).thenReturn(Optional.of(categoriaResponse));
         when(produtoRepository.save(any(Produto.class))).thenReturn(produto);
-        when(produtoRepository.existsByCodigoBarras(any())).thenReturn(false);
+        doNothing().when(validadorUtil).validarCodigoBarras(anyString(), any());
 
         ProdutoResponse resultado = produtoService.criar(produtoForm);
 
@@ -92,11 +96,13 @@ class ProdutoServiceImplTest {
         assertEquals(produto.getNome(), resultado.getNome());
         assertEquals(produto.getCodigoBarras(), resultado.getCodigoBarras());
         verify(produtoRepository, times(1)).save(any(Produto.class));
+        verify(validadorUtil, times(1)).validarCodigoBarras(produtoForm.getCodigoBarras(), null);
     }
 
     @Test
     void criar_QuandoCodigoBarrasJaExiste_DeveLancarExcecao() {
-        when(produtoRepository.existsByCodigoBarras(any())).thenReturn(true);
+        doThrow(new ViolacaoIntegridadeDadosException("Código de barras já cadastrado"))
+                .when(validadorUtil).validarCodigoBarras(anyString(), any());
 
         assertThrows(ViolacaoIntegridadeDadosException.class,
                 () -> produtoService.criar(produtoForm));
@@ -109,7 +115,7 @@ class ProdutoServiceImplTest {
         when(categoriaService.consultarPorId(any())).thenReturn(Optional.of(categoriaResponse));
         when(produtoRepository.findById(id)).thenReturn(Optional.of(produto));
         when(produtoRepository.save(any(Produto.class))).thenReturn(produto);
-        when(produtoRepository.existsByCodigoBarrasAndIdNot(any(), any())).thenReturn(false);
+        doNothing().when(validadorUtil).validarCodigoBarras(anyString(), any());
 
         ProdutoResponse resultado = produtoService.atualizar(id, produtoForm);
 
@@ -118,6 +124,7 @@ class ProdutoServiceImplTest {
         assertEquals(produto.getNome(), resultado.getNome());
         assertEquals(produto.getCodigoBarras(), resultado.getCodigoBarras());
         verify(produtoRepository, times(1)).save(any(Produto.class));
+        verify(validadorUtil, times(1)).validarCodigoBarras(produtoForm.getCodigoBarras(), id);
     }
 
     @Test

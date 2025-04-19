@@ -53,4 +53,8 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     @Override
     @CacheEvict(value = "produtos", allEntries = true)
     void delete(@NonNull Produto entity);
+
+    boolean existsByNomeIgnoreCase(String nome);
+
+    boolean existsByNomeIgnoreCaseAndIdNot(String nome, Long idProduto);
 }

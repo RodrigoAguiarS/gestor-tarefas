@@ -14,9 +14,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Perfil extends EntidadeBase {
 
-    public final static Long ADMINSTRADOR = 2L;
-
-    public final static Long OPERADOR = 1L;
+    public final static Long ADMINSTRADOR = 1L;
+    public final static Long OPERADOR = 2L;
+    public final static Long CLIENTE = 3L;
 
     @Column(name = "nome")
     private String nome;

@@ -12,6 +12,7 @@ import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.services.IPerfil;
 import br.com.rodrigo.gestortarefas.api.services.IUsuario;
+import br.com.rodrigo.gestortarefas.api.util.ValidadorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,7 @@ public class UsuarioServiceImpl implements IUsuario {
     private final IPerfil perfilService;
     private final UsuarioRepository usuarioRepository;
     private final TarefaRepository tarefaRepository;
+    private final ValidadorUtil validadorUtil;
 
     @Override
     public UsuarioResponse criar(UsuarioForm usuarioForm) {
@@ -81,7 +83,8 @@ public class UsuarioServiceImpl implements IUsuario {
     }
 
     private Usuario criarEntidade(UsuarioForm usuarioForm, Long id) {
-        verificarUnicidadeEmailCpf(usuarioForm.getEmail(), usuarioForm.getCpf(), id);
+        validadorUtil.validarEmailUnico(usuarioForm.getEmail(), id);
+        validadorUtil.validarCpfUnico(usuarioForm.getCpf(), id);
 
         Usuario usuario = id == null ? new Usuario() : usuarioRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(id)));
@@ -124,24 +127,6 @@ public class UsuarioServiceImpl implements IUsuario {
         return usuarioRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.USUARIO_NAO_ENCONTRADO_POR_LOGIN.getMessage(email)));
-    }
-
-    private void verificarUnicidadeEmailCpf(String email, String cpf, Long id) {
-        if (id == null) {
-            if (usuarioRepository.existsByEmailIgnoreCase(email)) {
-                throw new ViolacaoIntegridadeDadosException(MensagensError.EMAIL_JA_CADASTRADO.getMessage(email));
-            }
-            if (usuarioRepository.existsByPessoaCpf(cpf)) {
-                throw new ViolacaoIntegridadeDadosException(MensagensError.CPF_JA_CADASTRADO.getMessage(cpf));
-            }
-        } else {
-            if (usuarioRepository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
-                throw new ViolacaoIntegridadeDadosException(MensagensError.EMAIL_JA_CADASTRADO.getMessage(email));
-            }
-            if (usuarioRepository.existsByPessoaCpfAndIdNot(cpf, id)) {
-                throw new ViolacaoIntegridadeDadosException(MensagensError.CPF_JA_CADASTRADO.getMessage(cpf));
-            }
-        }
     }
 
     private void verifcarTarefaVinculadoUsuario(Long idUsuario) {

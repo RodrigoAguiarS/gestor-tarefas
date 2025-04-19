@@ -16,12 +16,11 @@ import lombok.Setter;
 @Entity
 public class Cliente extends EntidadeBase {
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_usuario")
-    private Usuario usuario;
+    private Usuario usuario = new Usuario();
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_endereco")
-    private Endereco endereco;
-
+    private Endereco endereco = new Endereco();
 }

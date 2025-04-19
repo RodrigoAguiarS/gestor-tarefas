@@ -2,7 +2,6 @@ package br.com.rodrigo.gestortarefas.api.services.impl;
 
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
-import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
 import br.com.rodrigo.gestortarefas.api.model.Categoria;
 import br.com.rodrigo.gestortarefas.api.model.Produto;
 import br.com.rodrigo.gestortarefas.api.model.form.ProdutoForm;
@@ -12,6 +11,7 @@ import br.com.rodrigo.gestortarefas.api.repository.ProdutoRepository;
 import br.com.rodrigo.gestortarefas.api.services.ICategoria;
 import br.com.rodrigo.gestortarefas.api.services.IProduto;
 import br.com.rodrigo.gestortarefas.api.services.S3StorageService;
+import br.com.rodrigo.gestortarefas.api.util.ValidadorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +31,7 @@ public class ProdutoServiceImpl implements IProduto {
     private final ICategoria categoriaService;
     private final ProdutoRepository produtoRepository;
     private final S3StorageService s3StorageService;
+    private final ValidadorUtil validadorUtil;
 
     @Override
     public ProdutoResponse criar(ProdutoForm produtoForm) {
@@ -80,7 +81,9 @@ public class ProdutoServiceImpl implements IProduto {
                 : produtoRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.PRODUTO_NAO_ENCONTRADO.getMessage(id)));
-        validarCodigoBarras(produtoForm.getCodigoBarras(), id);
+
+        validadorUtil.validarNomeProduto(produtoForm.getNome(), id);
+        validadorUtil.validarCodigoBarras(produtoForm.getCodigoBarras(), id);
 
         CategoriaResponse response = categoriaService.consultarPorId(produtoForm.getCategoriaId())
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
@@ -116,18 +119,5 @@ public class ProdutoServiceImpl implements IProduto {
                         produto.getCategoria().getDescricao()),
                 produto.getArquivosUrl());
 
-    }
-
-    private void validarCodigoBarras(String codigoBarras, Long id) {
-        boolean codigoBarrasExiste;
-        if (id == null) {
-            codigoBarrasExiste = produtoRepository.existsByCodigoBarras(codigoBarras);
-        } else {
-            codigoBarrasExiste = produtoRepository.existsByCodigoBarrasAndIdNot(codigoBarras, id);
-        }
-        if (codigoBarrasExiste) {
-            throw new ViolacaoIntegridadeDadosException(
-                    MensagensError.CODIGO_BARRAS_DUPLICADO.getMessage(codigoBarras));
-        }
     }
 }
