@@ -7,20 +7,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Perfil extends EntidadeBase {
-
-    public final static Long ADMINSTRADOR = 1L;
-    public final static Long OPERADOR = 2L;
-    public final static Long CLIENTE = 3L;
+public class Pagamento extends EntidadeBase {
 
     @Column(name = "nome")
     private String nome;
 
     @Column(name = "descricao")
     private String descricao;
+
+    @Column(name = "porcentagem_acrescimo")
+    private BigDecimal porcentagemAcrescimo;
 }

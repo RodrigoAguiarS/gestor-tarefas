@@ -5,17 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotificacaoResponse {
-
+public class StatusResponse {
     private Long id;
-    private String mensagem;
-    private boolean lida;
-    private UsuarioResponse usuario;
-    private LocalDateTime criadoEm;
+    private String nome;
+    private String descricao;
 }

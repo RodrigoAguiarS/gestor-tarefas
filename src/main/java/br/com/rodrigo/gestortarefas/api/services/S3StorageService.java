@@ -1,5 +1,7 @@
 package br.com.rodrigo.gestortarefas.api.services;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class S3StorageService {
 
     private final S3Client s3Client;
+    Logger logger = LogManager.getLogger(S3StorageService.class);
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -58,17 +61,22 @@ public class S3StorageService {
     }
 
     public void apagarArquivo(String fileUrl) {
-        String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
 
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .build();
+        try {
+            String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
 
-        DeleteObjectResponse response = s3Client.deleteObject(deleteObjectRequest);
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .build();
 
-        if (!response.sdkHttpResponse().isSuccessful()) {
-            throw new RuntimeException("Erro ao deletar o arquivo do S3");
+            DeleteObjectResponse response = s3Client.deleteObject(deleteObjectRequest);
+
+            if (!response.sdkHttpResponse().isSuccessful()) {
+                logger.error("Erro ao deletar o arquivo do S3: {}", fileUrl);
+            }
+        } catch (Exception e) {
+            logger.error("Erro ao tentar apagar o arquivo: {}. Detalhes: {}", fileUrl, e.getMessage(), e);
         }
     }
 }

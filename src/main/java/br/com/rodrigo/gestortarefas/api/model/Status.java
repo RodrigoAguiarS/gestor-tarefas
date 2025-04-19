@@ -12,11 +12,10 @@ import lombok.Setter;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Perfil extends EntidadeBase {
-
-    public final static Long ADMINSTRADOR = 1L;
-    public final static Long OPERADOR = 2L;
-    public final static Long CLIENTE = 3L;
+public class Status extends EntidadeBase{
+    public final static Long EM_ADAMENTO = 1L;
+    public final static Long ESTORNADO = 4L;
+    public final static Long CONCLUIDO = 2L;
 
     @Column(name = "nome")
     private String nome;

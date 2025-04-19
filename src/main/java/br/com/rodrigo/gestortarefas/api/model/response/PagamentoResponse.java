@@ -5,17 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotificacaoResponse {
-
+public class PagamentoResponse {
     private Long id;
-    private String mensagem;
-    private boolean lida;
-    private UsuarioResponse usuario;
-    private LocalDateTime criadoEm;
+    private String nome;
+    private String descricao;
+    private BigDecimal porcentagemAcrescimo;
 }

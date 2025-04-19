@@ -9,33 +9,22 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.List;
+
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProdutoForm {
+public class PagamentoForm {
 
     @NotBlank
-    @Size(max = 100)
+    @Size(max = 50)
     private String nome;
 
-    @NotNull
-    private BigDecimal preco;
-
     @NotBlank
-    @Size(max = 500)
+    @Size(max = 255)
     private String descricao;
 
-    @NotBlank
-    private String codigoBarras;
-
     @NotNull
-    private Integer quantidade;
-
-    private List<String> arquivosUrl;
-
-    @NotNull
-    private Long categoriaId;
+    private BigDecimal porcentagemAcrescimo;
 }

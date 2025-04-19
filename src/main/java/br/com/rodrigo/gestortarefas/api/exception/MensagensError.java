@@ -15,9 +15,11 @@ public enum MensagensError {
     EMAIL_JA_CADASTRADO("E-mail %s já cadastrado"),
     CPF_JA_CADASTRADO("CPF %s já cadastrado"),
     USUARIO_NAO_ENCONTRADO_POR_ID("Usuário não encontrado para o id %s"),
+    CLIENTE_NAO_ENCONTRADO_POR_ID("Cliente não encontrado para o id %s"),
     PERFIL_NAO_ENCONTRADO("Perfil não encontrado para o id %s"),
     PRODUTO_NAO_ENCONTRADO("Produto não encontrado para o id %s"),
-    CODIGO_BARRAS_DUPLICADO("Código de barras %s já cadastrado"),;
+    CODIGO_BARRAS_DUPLICADO("Código de barras %s já cadastrado"),
+    NOME_PRODUTO_DUPLICADO("Nome do produto %s já cadastrado");
 
     private final String message;
 
