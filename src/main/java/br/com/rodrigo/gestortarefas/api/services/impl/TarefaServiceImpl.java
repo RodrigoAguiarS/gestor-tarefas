@@ -51,7 +51,7 @@ public class TarefaServiceImpl implements ITarefa {
         tarefa = tarefaRepository.save(tarefa);
         String mensagem = criarMensagemTarefa(tarefa);
         NotificacaoResponse notificacao = notificacaoServiceImpl.criarNotificacao(tarefa.getResponsavel(), mensagem);
-        messagingTemplate.convertAndSend("/topic/notificacoes", notificacao);
+        messagingTemplate.convertAndSend("/topic/vendas", notificacao);
         return construirDto(tarefa);
     }
 
