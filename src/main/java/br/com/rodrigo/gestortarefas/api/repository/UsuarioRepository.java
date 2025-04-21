@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
@@ -59,4 +60,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     @Override
     @CacheEvict(value = "usuarios", allEntries = true)
     void delete(@NonNull Usuario entity);
+
+    List<Usuario> findAllByPerfisId(long idPerfil);
 }
