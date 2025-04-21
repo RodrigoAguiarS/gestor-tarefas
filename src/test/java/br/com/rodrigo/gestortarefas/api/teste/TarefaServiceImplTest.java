@@ -7,6 +7,8 @@ import br.com.rodrigo.gestortarefas.api.model.Tarefa;
 import br.com.rodrigo.gestortarefas.api.model.Usuario;
 import br.com.rodrigo.gestortarefas.api.model.response.TarefaResponse;
 import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
+import br.com.rodrigo.gestortarefas.api.services.SseService;
+import br.com.rodrigo.gestortarefas.api.services.impl.NotificacaoServiceImpl;
 import br.com.rodrigo.gestortarefas.api.services.impl.TarefaServiceImpl;
 import br.com.rodrigo.gestortarefas.api.util.ModelMapperUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +40,13 @@ class TarefaServiceImplTest {
 
     @Mock
     private TarefaRepository tarefaRepository;
+
+    @Mock
+    private NotificacaoServiceImpl notificacaoService;
+
+    @Mock
+    private SseService service;
+
 
     @InjectMocks
     private TarefaServiceImpl tarefaService;

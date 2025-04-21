@@ -4,6 +4,7 @@ public enum MensagensError {
 
     // Geral
     USUARIO_NAO_ENCONTRADO_POR_LOGIN("Usuário não encontrado para o login %s"),
+    USUARIO_NAO_AUTORIZADO("Usuário não autorizado %s"),
     PERFIL_POSSUI_USUARIO("Perfil não pode ser apagado, está vinculado a um usuário"),
     CATEGORIA_POSSUI_PRODUTO("Categoria não pode ser apagado, está vinculado a um produto"),
     CATEGORIA_NAO_ENCONTRADA("Categoria não encontrada para o id %s"),
@@ -14,6 +15,7 @@ public enum MensagensError {
     ERRO_ENVIO_SMS("Erro ao enviar SMS: %s"),
     EMAIL_JA_CADASTRADO("E-mail %s já cadastrado"),
     CPF_JA_CADASTRADO("CPF %s já cadastrado"),
+    TOKEN_INVALIDO("Token inválido"),
     USUARIO_NAO_ENCONTRADO_POR_ID("Usuário não encontrado para o id %s"),
     CLIENTE_NAO_ENCONTRADO_POR_ID("Cliente não encontrado para o id %s"),
     PERFIL_NAO_ENCONTRADO("Perfil não encontrado para o id %s"),
