@@ -1,12 +1,14 @@
 package br.com.rodrigo.gestortarefas.api.repository;
 
 import br.com.rodrigo.gestortarefas.api.model.Pagamento;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 
 public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
@@ -21,4 +23,17 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
                           @Param("descricao") String descricao,
                           @Param("porcentagemAcrescimo") String porcentagemAcrescimo,
                           Pageable pageable);
+
+    @Override
+    @CacheEvict(value = "pagamentos", allEntries = true)
+    @NonNull
+    <S extends Pagamento> S save(@NonNull S entity);
+
+    @Override
+    @CacheEvict(value = "pagamentos", allEntries = true)
+    void deleteById(@NonNull Long id);
+
+    @Override
+    @CacheEvict(value = "pagamentos", allEntries = true)
+    void delete(@NonNull Pagamento entity);
 }

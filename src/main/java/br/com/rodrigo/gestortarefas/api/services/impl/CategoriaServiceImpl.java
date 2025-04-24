@@ -1,5 +1,6 @@
 package br.com.rodrigo.gestortarefas.api.services.impl;
 
+import br.com.rodrigo.gestortarefas.api.conversor.CategoriaMapper;
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
 import br.com.rodrigo.gestortarefas.api.model.Categoria;
@@ -34,22 +35,15 @@ public class CategoriaServiceImpl implements ICategoria {
     }
 
     private Categoria criaEntidade(CategoriaForm categoriaForm, Long id) {
-        Categoria categoria  = new Categoria();
+        Categoria categoria = CategoriaMapper.formParaEntidade(categoriaForm);
         if (isNotEmpty(id)) {
             categoria.setId(id);
         }
-        categoria.setNome(categoriaForm.getNome());
-        categoria.setDescricao(categoriaForm.getDescricao());
-
         return categoria;
     }
 
     private CategoriaResponse construirDto(Categoria categoria) {
-        CategoriaResponse categoriaResponse = new CategoriaResponse();
-        categoriaResponse.setId(categoria.getId());
-        categoriaResponse.setNome(categoria.getNome());
-        categoriaResponse.setDescricao(categoria.getDescricao());
-        return categoriaResponse;
+        return CategoriaMapper.entidadeParaResponse(categoria);
     }
 
     @Override

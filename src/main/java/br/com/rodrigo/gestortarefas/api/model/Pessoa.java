@@ -3,6 +3,7 @@ package br.com.rodrigo.gestortarefas.api.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 public class Pessoa extends EntidadeBase {
 
     @Column(name = "nome", length = 50)

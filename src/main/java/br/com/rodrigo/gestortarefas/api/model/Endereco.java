@@ -2,6 +2,7 @@ package br.com.rodrigo.gestortarefas.api.model;
 
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import jakarta.persistence.Column;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 public class Endereco extends EntidadeBase {
 
     @Column(name = "rua")
