@@ -30,7 +30,6 @@ public class ClienteServiceImpl implements ICliente {
     private final ClienteRepository clienteRepository;
     private final ValidadorUtil validadorUtil;
     private final IUsuario usuarioService;
-    private final ClienteMapper clienteMapper;
 
     @Override
     public ClienteResponse criar(ClienteForm clienteForm) {
@@ -96,10 +95,10 @@ public class ClienteServiceImpl implements ICliente {
         usuario = new Usuario();
         usuario.setId(usuarioResponse.getId());
 
-        return clienteMapper.formParaEntidade(clienteForm, usuario);
+        return ClienteMapper.formParaEntidade(clienteForm, usuario);
     }
 
     private ClienteResponse construirDto(Cliente cliente) {
-        return clienteMapper.entidadeParaResponse(cliente);
+        return ClienteMapper.entidadeParaResponse(cliente);
     }
 }
