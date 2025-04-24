@@ -1,22 +1,24 @@
 package br.com.rodrigo.gestortarefas.api.services.impl;
 
+import br.com.rodrigo.gestortarefas.api.conversor.ClienteMapper;
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.model.Cliente;
 import br.com.rodrigo.gestortarefas.api.model.Perfil;
+import br.com.rodrigo.gestortarefas.api.model.Usuario;
 import br.com.rodrigo.gestortarefas.api.model.form.ClienteForm;
+import br.com.rodrigo.gestortarefas.api.model.form.UsuarioForm;
 import br.com.rodrigo.gestortarefas.api.model.response.ClienteResponse;
-import br.com.rodrigo.gestortarefas.api.model.response.PerfilResponse;
+import br.com.rodrigo.gestortarefas.api.model.response.UsuarioResponse;
 import br.com.rodrigo.gestortarefas.api.repository.ClienteRepository;
 import br.com.rodrigo.gestortarefas.api.services.ICliente;
-import br.com.rodrigo.gestortarefas.api.services.IPerfil;
+import br.com.rodrigo.gestortarefas.api.services.IUsuario;
 import br.com.rodrigo.gestortarefas.api.util.ValidadorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -26,9 +28,9 @@ import java.util.Optional;
 public class ClienteServiceImpl implements ICliente {
 
     private final ClienteRepository clienteRepository;
-    private final IPerfil  perfilService;
-    private final PasswordEncoder passwordEncoder;
     private final ValidadorUtil validadorUtil;
+    private final IUsuario usuarioService;
+    private final ClienteMapper clienteMapper;
 
     @Override
     public ClienteResponse criar(ClienteForm clienteForm) {
@@ -67,54 +69,37 @@ public class ClienteServiceImpl implements ICliente {
     }
 
     private Cliente criaCliente(ClienteForm clienteForm, Long id) {
-
         validadorUtil.validarEmailUnico(clienteForm.getEmail(), id);
         validadorUtil.validarCpfUnico(clienteForm.getCpf(), id);
 
         Cliente cliente = id == null ? new Cliente() : clienteRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(id)));
+                        MensagensError.CLIENTE_NAO_ENCONTRADO_POR_ID.getMessage(id)));
 
-        PerfilResponse perfilReponse = perfilService.consultarPorId(Perfil.CLIENTE)
-                .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.PERFIL_NAO_ENCONTRADO.getMessage(Perfil.CLIENTE)));
+        UsuarioForm usuarioForm = UsuarioForm.builder()
+                .email(clienteForm.getEmail())
+                .senha(clienteForm.getSenha())
+                .perfil(Perfil.CLIENTE)
+                .nome(clienteForm.getNome())
+                .cpf(clienteForm.getCpf())
+                .dataNascimento(clienteForm.getDataNascimento())
+                .telefone(clienteForm.getTelefone())
+                .build();
 
-        Perfil perfil = new Perfil();
-        perfil.setId(perfilReponse.getId());
-        perfil.setNome(perfilReponse.getNome());
-        perfil.setDescricao(perfilReponse.getDescricao());
-        cliente.getEndereco().setRua(clienteForm.getRua());
-        cliente.getEndereco().setNumero(clienteForm.getNumero());
-        cliente.getEndereco().setBairro(clienteForm.getBairro());
-        cliente.getEndereco().setCidade(clienteForm.getCidade());
-        cliente.getEndereco().setEstado(clienteForm.getEstado());
-        cliente.getEndereco().setCep(clienteForm.getCep());
-        cliente.getUsuario().getPessoa().setNome(clienteForm.getNome());
-        cliente.getUsuario().getPessoa().setCpf(clienteForm.getCpf());
-        cliente.getUsuario().getPessoa().setDataNascimento(clienteForm.getDataNascimento());
-        cliente.getUsuario().getPessoa().setTelefone(clienteForm.getTelefone());
-        cliente.getUsuario().setEmail(clienteForm.getEmail());
-        cliente.getUsuario().getPerfis().add(perfil);
-        cliente.getUsuario().setSenha(passwordEncoder.encode(clienteForm.getSenha()));
+        Usuario usuario;
+        UsuarioResponse usuarioResponse;
+        if (id == null) {
+            usuarioResponse = usuarioService.criar(usuarioForm);
+        } else {
+            usuarioResponse = usuarioService.atualizar(cliente.getUsuario().getId(), usuarioForm);
+        }
+        usuario = new Usuario();
+        usuario.setId(usuarioResponse.getId());
 
-        return cliente;
+        return clienteMapper.formParaEntidade(clienteForm, usuario);
     }
 
     private ClienteResponse construirDto(Cliente cliente) {
-        ClienteResponse clienteResponse = new ClienteResponse();
-        clienteResponse.setId(cliente.getId());
-        clienteResponse.setNome(cliente.getUsuario().getPessoa().getNome());
-        clienteResponse.setEmail(cliente.getUsuario().getEmail());
-        clienteResponse.setCpf(cliente.getUsuario().getPessoa().getCpf());
-        clienteResponse.setDataNascimento(cliente.getUsuario().getPessoa().getDataNascimento());
-        clienteResponse.setTelefone(cliente.getUsuario().getPessoa().getTelefone());
-        clienteResponse.setRua(cliente.getEndereco().getRua());
-        clienteResponse.setNumero(cliente.getEndereco().getNumero());
-        clienteResponse.setBairro(cliente.getEndereco().getBairro());
-        clienteResponse.setCidade(cliente.getEndereco().getCidade());
-        clienteResponse.setEstado(cliente.getEndereco().getEstado());
-        clienteResponse.setCep(cliente.getEndereco().getCep());
-
-        return clienteResponse;
+        return clienteMapper.entidadeParaResponse(cliente);
     }
 }

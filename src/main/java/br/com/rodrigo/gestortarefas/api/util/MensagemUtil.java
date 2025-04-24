@@ -9,48 +9,27 @@ import java.time.format.DateTimeFormatter;
 public class MensagemUtil {
     private static final String TEMPLATE_TAREFA = """
             📋 Nova Tarefa
-            
-            🔑 Código:
-            %d
-            
+            🔑 Código: %d
             📌 Título:
             %s
-            
             📝 Descrição:
             %s
-            
-            ⚡ Prioridade:
-            %s
-            
-            📅 Prazo:
-            %s
-            
-            👤 Responsável:
-            %s""";
+            ⚡ Prioridade: %s
+            📅 Prazo: %s
+            👤 Responsável: %s""";
 
     private static final String TEMPLATE_MUDANCA_RESPONSAVEL = """
             🔄 Alteração de Responsável
-            
-            🔑 Código:
-            %d
-            
-            📌 Título:
-            %s
-            
-            👤 Novo Responsável:
-            %s""";
+            🔑 Código: %d
+            📌 Título: %s
+            👤 Novo Responsável: %s""";
 
     private static final String TEMPLATE_TAREFA_CONCLUIDA = """
             ✅ Tarefa Concluída
-            
-            🔑 Código:
-            %d
-            
-            📌 Título:
-            %s
-            
-            👤 Responsável:
-            %s""";
+            🔑 Código: %d
+            📌 Título: %s
+            👤 Responsável: %s""";
+
 
     public static String criarMensagemNovaTarefa(Tarefa tarefa) {
         return String.format(TEMPLATE_TAREFA,

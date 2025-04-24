@@ -1,5 +1,7 @@
 package br.com.rodrigo.gestortarefas.api.services.impl;
 
+import br.com.rodrigo.gestortarefas.api.conversor.CategoriaMapper;
+import br.com.rodrigo.gestortarefas.api.conversor.ProdutoMapper;
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.model.Categoria;
@@ -76,11 +78,11 @@ public class ProdutoServiceImpl implements IProduto {
     }
 
     private Produto criaProduto(ProdutoForm produtoForm, Long id) {
-        Produto produto = id == null
-                ? new Produto()
-                : produtoRepository.findById(id)
-                .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.PRODUTO_NAO_ENCONTRADO.getMessage(id)));
+        if (id != null) {
+            produtoRepository.findById(id)
+                    .orElseThrow(() -> new ObjetoNaoEncontradoException(
+                            MensagensError.PRODUTO_NAO_ENCONTRADO.getMessage(id)));
+        }
 
         validadorUtil.validarNomeProduto(produtoForm.getNome(), id);
         validadorUtil.validarCodigoBarras(produtoForm.getCodigoBarras(), id);
@@ -89,35 +91,12 @@ public class ProdutoServiceImpl implements IProduto {
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.CATEGORIA_NAO_ENCONTRADA.getMessage(produtoForm.getCategoriaId())));
 
-        Categoria categoria = new Categoria();
-        categoria.setId(response.getId());
-        categoria.setNome(response.getNome());
-        categoria.setDescricao(response.getDescricao());
-
-        produto.setNome(produtoForm.getNome());
-        produto.setPreco(produtoForm.getPreco());
-        produto.setDescricao(produtoForm.getDescricao());
-        produto.setCodigoBarras(produtoForm.getCodigoBarras());
-        produto.setQuantidade(produtoForm.getQuantidade());
-        produto.setArquivosUrl(produtoForm.getArquivosUrl());
-        produto.setCategoria(categoria);
-
-        return produto;
+        Categoria categoria = CategoriaMapper.responseParaEntidade(response);
+        return ProdutoMapper.formParaEntidade(produtoForm, categoria);
     }
 
     private ProdutoResponse construirDto(Produto produto) {
-        return new ProdutoResponse(
-                produto.getId(),
-                produto.getNome(),
-                produto.getDescricao(),
-                produto.getCodigoBarras(),
-                produto.getQuantidade(),
-                produto.getPreco(),
-                new CategoriaResponse(
-                        produto.getCategoria().getId(),
-                        produto.getCategoria().getNome(),
-                        produto.getCategoria().getDescricao()),
-                produto.getArquivosUrl());
+        return ProdutoMapper.entidadeParaResponse(produto);
 
     }
 }
