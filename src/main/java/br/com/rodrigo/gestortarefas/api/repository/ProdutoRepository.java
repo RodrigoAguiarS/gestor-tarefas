@@ -15,10 +15,13 @@ import java.math.BigDecimal;
 
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
+    @Cacheable("produtos")
     Boolean existsByCodigoBarras(String codigoBarras);
 
+    @Cacheable("produtos")
     Boolean existsByCodigoBarrasAndIdNot(String codigoBarras, Long id);
 
+    @Cacheable("produtos")
     boolean existsByCategoriaId(Long id);
 
     @Cacheable("produtos")
@@ -54,7 +57,9 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     @CacheEvict(value = "produtos", allEntries = true)
     void delete(@NonNull Produto entity);
 
+    @Cacheable("produtos")
     boolean existsByNomeIgnoreCase(String nome);
 
+    @Cacheable("produtos")
     boolean existsByNomeIgnoreCaseAndIdNot(String nome, Long idProduto);
 }

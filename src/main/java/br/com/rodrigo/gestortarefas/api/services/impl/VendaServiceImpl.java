@@ -7,7 +7,9 @@ import br.com.rodrigo.gestortarefas.api.conversor.StatusMapper;
 import br.com.rodrigo.gestortarefas.api.conversor.VendaMapper;
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
+import br.com.rodrigo.gestortarefas.api.model.HistoricoStatusVenda;
 import br.com.rodrigo.gestortarefas.api.model.ItemVenda;
+import br.com.rodrigo.gestortarefas.api.model.Perfil;
 import br.com.rodrigo.gestortarefas.api.model.Produto;
 import br.com.rodrigo.gestortarefas.api.model.Status;
 import br.com.rodrigo.gestortarefas.api.model.TipoVenda;
@@ -17,6 +19,7 @@ import br.com.rodrigo.gestortarefas.api.model.response.ClienteResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.PagamentoResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.StatusResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.VendaResponse;
+import br.com.rodrigo.gestortarefas.api.repository.HistoricoStatusVendaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.VendaRepository;
 import br.com.rodrigo.gestortarefas.api.services.ICliente;
 import br.com.rodrigo.gestortarefas.api.services.IItemPedido;
@@ -24,12 +27,15 @@ import br.com.rodrigo.gestortarefas.api.services.IPagamento;
 import br.com.rodrigo.gestortarefas.api.services.IProduto;
 import br.com.rodrigo.gestortarefas.api.services.IStatus;
 import br.com.rodrigo.gestortarefas.api.services.IVenda;
+import br.com.rodrigo.gestortarefas.api.services.SseService;
+import br.com.rodrigo.gestortarefas.api.util.MensagemUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -42,15 +48,22 @@ import java.util.stream.Collectors;
 public class VendaServiceImpl implements IVenda, IItemPedido {
 
     private final VendaRepository vendaRepository;
+    private final HistoricoStatusVendaRepository historicoStatusVendaRepository;
     private final ICliente clienteService;
     private final IPagamento pagamentoService;
     private final IStatus statusService;
     private final IProduto produtoService;
+    private final SseService sseService;
 
     @Override
+    @Transactional
     public VendaResponse criar(VendaForm vendaForm, Long id) {
         Venda venda = criaVenda(vendaForm, id);
         venda = vendaRepository.save(venda);
+        salvarHistoricoStatus(venda, venda.getStatus(), venda.getStatus().getDescricao());
+        String mensagemVendaCriada = MensagemUtil.criarMensagemVendaRealizada(venda);
+        sseService.notificarPorPerfil(mensagemVendaCriada, Perfil.ADMINSTRADOR);
+
         return VendaMapper.entidadeParaResponse(venda);
     }
 
@@ -58,6 +71,28 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
     public Optional<VendaResponse> consultarPorId(Long id) {
         Optional<Venda> venda = vendaRepository.findById(id);
         return venda.map(VendaMapper::entidadeParaResponse);
+    }
+
+    @Override
+    public Page<VendaResponse> listarPedidosCliente(int page, int size, String sort) {
+        ClienteResponse cliente = clienteService.getClienteLogado()
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(
+                        MensagensError.CLIENTE_NAO_AUTORIZADO.getMessage()));
+
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = sortParams.length > 1 ?
+                Sort.Direction.fromString(sortParams[1]) : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+
+        Page<Venda> vendas = vendaRepository.findByClienteIdOrderByDataVendaDesc(cliente.getId(), pageable);
+
+        if (vendas.isEmpty()) {
+            throw new ObjetoNaoEncontradoException(
+                    MensagensError.VENDA_NAO_ENCONTRADA_POR_CLIENTE.getMessage(cliente.getId()));
+        }
+
+        return vendas.map(VendaMapper::entidadeParaResponse);
     }
 
     @Override
@@ -72,6 +107,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
 
         return vendas.map(VendaMapper::entidadeParaResponse);
     }
+
 
     private Venda criaVenda(VendaForm vendaForm, Long id) {
         Venda venda = id == null ? new Venda() : vendaRepository.findById(id)
@@ -129,6 +165,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
     }
 
     @Override
+    @Transactional
     public VendaResponse atualizarStatus(Long id, Long statusId) {
         Venda venda = vendaRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
@@ -137,9 +174,23 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
         StatusResponse statusResponse = statusService.consultarPorId(statusId)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.STATUS_NAO_ENCONTRADO_POR_ID.getMessage(statusId)));
+        Status novoStatus = StatusMapper.responseParaEntidade(statusResponse);
 
-        venda.setStatus(StatusMapper.responseParaEntidade(statusResponse));
+        venda.setStatus(novoStatus);
+        venda = vendaRepository.save(venda);
+        salvarHistoricoStatus(venda, novoStatus, novoStatus.getDescricao());
 
-        return VendaMapper.entidadeParaResponse(vendaRepository.save(venda));
+        String mensagem = MensagemUtil.criarMensagemMudancaStatusVenda(venda, novoStatus.getDescricao());
+        sseService.notificarUsuario(venda.getCliente().getUsuario().getId(), mensagem);
+
+        return VendaMapper.entidadeParaResponse(venda);
+    }
+
+    private void salvarHistoricoStatus(Venda venda, Status novoStatus, String observacao) {
+        HistoricoStatusVenda historico = new HistoricoStatusVenda();
+        historico.setVenda(venda);
+        historico.setStatus(novoStatus);
+        historico.setObservacao(observacao);
+        historicoStatusVendaRepository.save(historico);
     }
 }

@@ -1,6 +1,9 @@
 package br.com.rodrigo.gestortarefas.api.repository;
 
 import br.com.rodrigo.gestortarefas.api.model.Venda;
+import com.google.firebase.internal.NonNull;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +18,10 @@ import java.time.LocalDateTime;
 @Repository
 public interface VendaRepository extends JpaRepository<Venda, Long> {
 
+    @Cacheable("vendas")
+    Page<Venda> findByClienteIdOrderByDataVendaDesc(Long clienteId, Pageable pageable);
+
+    @Cacheable("vendas")
     @Query("""
     SELECT v
     FROM Venda v
@@ -44,4 +51,17 @@ public interface VendaRepository extends JpaRepository<Venda, Long> {
             @Param("dataFim") LocalDateTime dataFim,
             Pageable pageable
     );
+
+    @Override
+    @CacheEvict(value = "vendas", allEntries = true)
+    @NonNull
+    <S extends Venda> S save(@NonNull S entity);
+
+    @Override
+    @CacheEvict(value = "vendas", allEntries = true)
+    void deleteById(@NonNull Long id);
+
+    @Override
+    @CacheEvict(value = "vendas", allEntries = true)
+    void delete(@NonNull Venda entity);
 }

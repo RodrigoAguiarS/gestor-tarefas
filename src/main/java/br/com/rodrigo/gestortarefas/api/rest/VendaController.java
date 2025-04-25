@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -27,6 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -71,21 +71,11 @@ public class VendaController extends ControllerBase<VendaResponse> {
                         formaPagamento, valorMinimo, valorMaximo, inicio, fim));
     }
 
-    @GetMapping("/{id}/proximos-status")
-    public ResponseEntity<List<StatusResponse>> getProximosStatus(
-            @PathVariable Long id,
-            @RequestParam TipoVenda tipoVenda) {
-
-        VendaResponse venda = vendaService.consultarPorId(id)
-                .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.VENDA_NAO_ENCONTRADA.getMessage(id)));
-
-        List<StatusResponse> proximosStatus = statusVendaService.getProximosStatusPossiveis(
-                venda.getStatus().getId(),
-                tipoVenda
-        );
-
-        return ResponseEntity.ok(proximosStatus);
+    @GetMapping("/{id}")
+    public ResponseEntity<VendaResponse> consultarPorId(@PathVariable Long id) {
+        Optional<VendaResponse> response = vendaService.consultarPorId(id);
+        return response.map(this::responderSucessoComItem)
+                .orElseGet(this::responderItemNaoEncontrado);
     }
 
     @PutMapping("/{id}/status/{statusId}")
@@ -107,6 +97,16 @@ public class VendaController extends ControllerBase<VendaResponse> {
             throw new IllegalStateException("Status inválido para a operação");
         }
 
-        return ResponseEntity.ok(vendaService.atualizarStatus(id, statusId));
+        return responderItemCriado(vendaService.atualizarStatus(id, statusId));
+    }
+
+    @GetMapping("/meus-pedidos")
+    public ResponseEntity<Page<VendaResponse>> listarMeusPedidos(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String sort) {
+
+        Page<VendaResponse> vendaResponses = vendaService.listarPedidosCliente(page, size, sort);
+        return responderListaDeItensPaginada(vendaResponses);
     }
 }

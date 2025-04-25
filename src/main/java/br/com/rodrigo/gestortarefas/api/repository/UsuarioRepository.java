@@ -61,5 +61,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     @CacheEvict(value = "usuarios", allEntries = true)
     void delete(@NonNull Usuario entity);
 
+    @Cacheable("usuarios")
     List<Usuario> findAllByPerfisId(long idPerfil);
 }

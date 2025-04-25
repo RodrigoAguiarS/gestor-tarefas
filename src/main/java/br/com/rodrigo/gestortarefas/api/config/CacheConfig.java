@@ -13,7 +13,7 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager(com.github.benmanes.caffeine.cache.Caffeine<Object, Object> caffeineCacheBuilder) {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager("tarefas",
-                "usuarios", "produtos", "categorias", "perfis", "pagamentos", "status");
+                "usuarios", "produtos", "categorias", "perfis", "pagamentos", "status", "notificacoes", "vendas", "clientes");
         cacheManager.setCaffeine(caffeineCacheBuilder);
         return cacheManager;
     }
