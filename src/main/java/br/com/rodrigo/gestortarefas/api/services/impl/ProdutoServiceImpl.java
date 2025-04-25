@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -70,6 +71,13 @@ public class ProdutoServiceImpl implements IProduto {
     }
 
     @Override
+    public Produto buscarPorId(Long id) {
+        return produtoRepository.findById(id)
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(
+                        MensagensError.PRODUTO_NAO_ENCONTRADO.getMessage(id)));
+    }
+
+    @Override
     public Page<ProdutoResponse> listarTodos(int page, int size, String sort, Long id, String nome, String descricao,
                                              BigDecimal preco, String codigoBarras, Integer quantidade, Long categoriaId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort != null ? sort : "id"));
@@ -77,12 +85,18 @@ public class ProdutoServiceImpl implements IProduto {
         return produtos.map(this::construirDto);
     }
 
-    private Produto criaProduto(ProdutoForm produtoForm, Long id) {
-        if (id != null) {
-            produtoRepository.findById(id)
-                    .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                            MensagensError.PRODUTO_NAO_ENCONTRADO.getMessage(id)));
+    @Override
+    public List<Produto> buscarPorIds(List<Long> produtoIds) {
+        if (produtoIds != null && !produtoIds.isEmpty()) {
+            return produtoRepository.findAllById(produtoIds);
         }
+        return List.of();
+    }
+
+    private Produto criaProduto(ProdutoForm produtoForm, Long id) {
+        Produto produto = id != null ? produtoRepository.findById(id)
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(
+                        MensagensError.PRODUTO_NAO_ENCONTRADO.getMessage(id))) : new Produto();
 
         validadorUtil.validarNomeProduto(produtoForm.getNome(), id);
         validadorUtil.validarCodigoBarras(produtoForm.getCodigoBarras(), id);
@@ -92,7 +106,16 @@ public class ProdutoServiceImpl implements IProduto {
                         MensagensError.CATEGORIA_NAO_ENCONTRADA.getMessage(produtoForm.getCategoriaId())));
 
         Categoria categoria = CategoriaMapper.responseParaEntidade(response);
-        return ProdutoMapper.formParaEntidade(produtoForm, categoria);
+
+        produto.setNome(produtoForm.getNome());
+        produto.setDescricao(produtoForm.getDescricao());
+        produto.setPreco(produtoForm.getPreco());
+        produto.setCodigoBarras(produtoForm.getCodigoBarras());
+        produto.setQuantidade(produtoForm.getQuantidade());
+        produto.setCategoria(categoria);
+        produto.setArquivosUrl(produtoForm.getArquivosUrl());
+
+        return produto;
     }
 
     private ProdutoResponse construirDto(Produto produto) {

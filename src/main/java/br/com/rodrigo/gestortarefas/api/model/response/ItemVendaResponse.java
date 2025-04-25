@@ -7,15 +7,14 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PagamentoResponse {
-    private Long id;
-    private String nome;
+public class ItemVendaResponse {
     private String descricao;
-    private BigDecimal porcentagemAcrescimo;
-    private Boolean ativo;
+    private ProdutoResponse produto;
+    private Integer quantidade;
+    private BigDecimal precoUnitario;
+    private BigDecimal valorTotal;
 }

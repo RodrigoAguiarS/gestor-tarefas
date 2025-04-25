@@ -3,6 +3,9 @@ package br.com.rodrigo.gestortarefas.api.model;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -28,7 +31,10 @@ public class Venda extends EntidadeBase {
     @JoinColumn(name = "id_cliente")
     private Cliente cliente;
 
-    @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "venda",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER)
     @Column(name = "itens")
     private List<ItemVenda> itens;
 
@@ -51,4 +57,7 @@ public class Venda extends EntidadeBase {
     @JoinColumn(name = "id_registro_entrada")
     private RegistroEntrada registroEntrada;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_venda", nullable = false)
+    private TipoVenda tipoVenda;
 }

@@ -13,9 +13,16 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Status extends EntidadeBase{
+
     public final static Long EM_ADAMENTO = 1L;
+    public final static Long PENDENTE = 3L;
     public final static Long ESTORNADO = 4L;
     public final static Long CONCLUIDO = 2L;
+    public final static Long CANCELADO = 5L;
+    public final static Long EM_PREPARACAO = 6L;
+    public final static Long ENVIADO = 7L;
+    public final static Long ENTREGUE = 8L;
+    public final static Long EM_TRANSPORTE = 9L;
 
     @Column(name = "nome")
     private String nome;

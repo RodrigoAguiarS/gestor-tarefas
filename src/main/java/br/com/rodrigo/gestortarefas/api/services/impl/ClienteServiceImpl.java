@@ -59,6 +59,18 @@ public class ClienteServiceImpl implements ICliente {
         return clienteRepository.findById(id).map(this::construirDto);
     }
 
+
+    @Override
+    public Optional<ClienteResponse> getClienteLogado() {
+        Usuario usuario = usuarioService.obterUsuarioLogado();
+
+        Cliente cliente = clienteRepository.findClienteByUsuarioId(usuario.getId())
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(
+                        MensagensError.CLIENTE_NAO_ENCONTRADO_POR_ID.getMessage(usuario.getId())));
+
+        return Optional.of(ClienteMapper.entidadeParaResponse(cliente));
+    }
+
     @Override
     public Page<ClienteResponse> buscar(int page, int size, String sort, String email,
                                         String nome, String cpf, String cidade, String estado, String cep) {

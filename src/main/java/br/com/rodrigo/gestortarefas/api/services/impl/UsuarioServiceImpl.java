@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -83,13 +82,13 @@ public class UsuarioServiceImpl implements IUsuario {
         return usuarios.map(this::construirDto);
     }
 
-    public Usuario criarEntidade(UsuarioForm usuarioForm, Long id) {
+    private Usuario criarEntidade(UsuarioForm usuarioForm, Long id) {
         validadorUtil.validarEmailUnico(usuarioForm.getEmail(), id);
         validadorUtil.validarCpfUnico(usuarioForm.getCpf(), id);
 
-        Usuario usuario = id == null ? new Usuario() : usuarioRepository.findById(id)
+        Usuario usuario = id != null ? usuarioRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(id)));
+                        MensagensError.USUARIO_NAO_ENCONTRADO_POR_ID.getMessage(id))) : new Usuario();
 
         Perfil perfil = perfilService.consultarPorId(usuarioForm.getPerfil())
                 .map(perfilResponse -> {
@@ -102,14 +101,15 @@ public class UsuarioServiceImpl implements IUsuario {
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.PERFIL_NAO_ENCONTRADO.getMessage(usuarioForm.getPerfil())));
 
-        Set<Perfil> perfis = Collections.singleton(perfil);
+        usuario.getPessoa().setNome(usuarioForm.getNome());
+        usuario.getPessoa().setDataNascimento(usuarioForm.getDataNascimento());
+        usuario.getPessoa().setTelefone(usuarioForm.getTelefone());
+        usuario.getPessoa().setCpf(usuarioForm.getCpf());
+        usuario.setEmail(usuarioForm.getEmail());
+        usuario.setSenha(passwordEncoder.encode(usuarioForm.getSenha()));
+        usuario.setPerfis(Collections.singleton(perfil));
 
-        if (id != null && (usuarioForm.getSenha() == null || usuarioForm.getSenha().isEmpty())) {
-            usuarioForm.setSenha(usuario.getSenha());
-        } else {
-            usuarioForm.setSenha(passwordEncoder.encode(usuarioForm.getSenha()));
-        }
-        return UsuarioMapper.formParaEntidade(usuarioForm, perfis);
+        return usuario;
     }
 
     @Override

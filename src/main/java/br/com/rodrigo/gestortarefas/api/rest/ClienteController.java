@@ -1,5 +1,7 @@
 package br.com.rodrigo.gestortarefas.api.rest;
 
+import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
+import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.model.form.ClienteForm;
 import br.com.rodrigo.gestortarefas.api.model.response.ClienteResponse;
 import br.com.rodrigo.gestortarefas.api.services.ICliente;
@@ -64,5 +66,13 @@ public class ClienteController extends ControllerBase<ClienteResponse> {
                                                             @RequestParam(required = false) String cep) {
         Page<ClienteResponse> clientes = clienteService.buscar(page, size, sort, email, nome, cpf, cidade, estado, cep);
         return responderListaDeItensPaginada(clientes);
+    }
+
+    @GetMapping("/logado")
+    public ResponseEntity<ClienteResponse> getClienteLogado() {
+        ClienteResponse clienteResponse = clienteService.getClienteLogado()
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(
+                        MensagensError.CLIENTE_NAO_ENCONTRADO_POR_ID.getMessage()));
+        return responderSucessoComItem(clienteResponse);
     }
 }

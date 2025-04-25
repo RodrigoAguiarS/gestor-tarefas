@@ -11,6 +11,7 @@ public interface ICliente {
     ClienteResponse atualizar(Long id, ClienteForm clienteForm);
     void deletar(Long id);
     Optional<ClienteResponse> consultarPorId(Long id);
+    Optional<ClienteResponse> getClienteLogado();
     Page<ClienteResponse> buscar(int page, int size, String sort, String email,
                                  String nome, String cpf, String cidade, String estado, String cep);
 }

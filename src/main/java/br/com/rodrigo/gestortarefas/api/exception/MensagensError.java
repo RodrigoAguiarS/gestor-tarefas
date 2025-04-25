@@ -18,10 +18,13 @@ public enum MensagensError {
     TOKEN_INVALIDO("Token inválido"),
     USUARIO_NAO_ENCONTRADO_POR_ID("Usuário não encontrado para o id %s"),
     CLIENTE_NAO_ENCONTRADO_POR_ID("Cliente não encontrado para o id %s"),
+    PAGAMENTO_NAO_ENCONTRADO_POR_ID("Forma de pagamento não encontrado para o id %s"),
     PERFIL_NAO_ENCONTRADO("Perfil não encontrado para o id %s"),
     PRODUTO_NAO_ENCONTRADO("Produto não encontrado para o id %s"),
+    VENDA_NAO_ENCONTRADA("Venda não encontrado para o id %s"),
     CODIGO_BARRAS_DUPLICADO("Código de barras %s já cadastrado"),
-    NOME_PRODUTO_DUPLICADO("Nome do produto %s já cadastrado");
+    NOME_PRODUTO_DUPLICADO("Nome do produto %s já cadastrado"),
+    STATUS_NAO_ENCONTRADO_POR_ID("Status não encontrado para o id %s");
 
     private final String message;
 

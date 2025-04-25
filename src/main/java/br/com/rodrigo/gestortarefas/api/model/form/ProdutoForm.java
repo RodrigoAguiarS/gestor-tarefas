@@ -17,6 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ProdutoForm {
 
+    private Long id;
+
     @NotBlank
     @Size(max = 100)
     private String nome;

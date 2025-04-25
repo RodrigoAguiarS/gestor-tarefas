@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -63,6 +64,14 @@ public class StatusServiceImpl implements IStatus {
     @Override
     public Optional<StatusResponse> consultarPorId(Long id) {
         return statusRepository.findById(id).map(this::construirDto);
+    }
+
+    @Override
+    public List<StatusResponse> buscarPorIds(List<Long> ids) {
+        return statusRepository.findAllById(ids)
+                .stream()
+                .map(this::construirDto)
+                .toList();
     }
 
     @Override
