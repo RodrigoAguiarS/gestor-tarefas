@@ -1,8 +1,14 @@
 package br.com.rodrigo.gestortarefas.api.rest;
 
+import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
+import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
+import br.com.rodrigo.gestortarefas.api.model.TipoVenda;
 import br.com.rodrigo.gestortarefas.api.model.form.StatusForm;
 import br.com.rodrigo.gestortarefas.api.model.response.StatusResponse;
+import br.com.rodrigo.gestortarefas.api.model.response.VendaResponse;
 import br.com.rodrigo.gestortarefas.api.services.IStatus;
+import br.com.rodrigo.gestortarefas.api.services.IVenda;
+import br.com.rodrigo.gestortarefas.api.services.StatusVendaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -26,6 +33,8 @@ import java.util.Optional;
 public class StatusController extends ControllerBase<StatusResponse> {
 
     private final IStatus statusService;
+    private final IVenda vendaService;
+    private final StatusVendaService statusVendaService;
 
     @PostMapping
     public ResponseEntity<StatusResponse> criar(@RequestBody @Valid StatusForm statusForm) {
@@ -61,5 +70,22 @@ public class StatusController extends ControllerBase<StatusResponse> {
                                                             @RequestParam(required = false) String descricao) {
         Page<StatusResponse> status = statusService.listarTodos(page, size, sort, id, nome, descricao);
         return responderListaDeItensPaginada(status);
+    }
+
+    @GetMapping("/{id}/proximos-status")
+    public ResponseEntity<List<StatusResponse>> getProximosStatus(
+            @PathVariable Long id,
+            @RequestParam TipoVenda tipoVenda) {
+
+        VendaResponse venda = vendaService.consultarPorId(id)
+                .orElseThrow(() -> new ObjetoNaoEncontradoException(
+                        MensagensError.VENDA_NAO_ENCONTRADA.getMessage(id)));
+
+        List<StatusResponse> proximosStatus = statusVendaService.getProximosStatusPossiveis(
+                venda.getStatus().getId(),
+                tipoVenda
+        );
+
+        return responderListaDeItens(proximosStatus);
     }
 }

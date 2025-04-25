@@ -24,7 +24,9 @@ public enum MensagensError {
     VENDA_NAO_ENCONTRADA("Venda não encontrado para o id %s"),
     CODIGO_BARRAS_DUPLICADO("Código de barras %s já cadastrado"),
     NOME_PRODUTO_DUPLICADO("Nome do produto %s já cadastrado"),
-    STATUS_NAO_ENCONTRADO_POR_ID("Status não encontrado para o id %s");
+    STATUS_NAO_ENCONTRADO_POR_ID("Status não encontrado para o id %s"),
+    CLIENTE_NAO_AUTORIZADO("Cliente não autorizado"),
+    VENDA_NAO_ENCONTRADA_POR_CLIENTE("Venda não encontrada para o cliente %s");
 
     private final String message;
 

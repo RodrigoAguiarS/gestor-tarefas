@@ -13,6 +13,8 @@ public interface IVenda {
 
     Optional<VendaResponse> consultarPorId(Long id);
 
+    Page<VendaResponse> listarPedidosCliente(int page, int size, String sort);
+
     Page<VendaResponse> listarTodos(int page, int size, String sort,
                                     Long id,
                                     String nomeCliente,
