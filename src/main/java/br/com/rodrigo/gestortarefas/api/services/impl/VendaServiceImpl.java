@@ -87,11 +87,6 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
 
         Page<Venda> vendas = vendaRepository.findByClienteIdOrderByDataVendaDesc(cliente.getId(), pageable);
 
-        if (vendas.isEmpty()) {
-            throw new ObjetoNaoEncontradoException(
-                    MensagensError.VENDA_NAO_ENCONTRADA_POR_CLIENTE.getMessage(cliente.getId()));
-        }
-
         return vendas.map(VendaMapper::entidadeParaResponse);
     }
 
