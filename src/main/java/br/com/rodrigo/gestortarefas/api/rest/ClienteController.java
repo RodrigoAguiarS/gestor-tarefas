@@ -31,13 +31,13 @@ public class ClienteController extends ControllerBase<ClienteResponse> {
 
     @PostMapping
     public ResponseEntity<ClienteResponse> criar(@RequestBody @Valid ClienteForm clienteForm, UriComponentsBuilder uriBuilder) {
-        ClienteResponse response = clienteService.criar(clienteForm);
+        ClienteResponse response = clienteService.criar(null, clienteForm);
         return responderItemCriadoComURI(response, uriBuilder, "/clientes/{id}", response.getId().toString());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ClienteResponse> atualizar(@PathVariable Long id, @RequestBody @Valid ClienteForm clienteForm) {
-        ClienteResponse response = clienteService.atualizar(id, clienteForm);
+        ClienteResponse response = clienteService.criar(id, clienteForm);
         return responderSucessoComItem(response);
     }
 

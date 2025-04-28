@@ -15,6 +15,7 @@ public class UsuarioMapper {
         UsuarioResponse response = new UsuarioResponse();
         response.setId(usuario.getId());
         response.setEmail(usuario.getEmail());
+        response.setEmpresa(EmpresaMapper.entidadeParaResponse(usuario.getEmpresa()));
         response.setPessoa(PessoaMapper.entidadeParaResponse(usuario.getPessoa()));
         response.setPerfis(usuario.getPerfis().stream()
                 .map(perfil -> new PerfilResponse(

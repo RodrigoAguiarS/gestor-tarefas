@@ -21,6 +21,7 @@ import br.com.rodrigo.gestortarefas.api.model.response.StatusResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.VendaResponse;
 import br.com.rodrigo.gestortarefas.api.repository.HistoricoStatusVendaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.VendaRepository;
+import br.com.rodrigo.gestortarefas.api.services.HorarioFuncionamentoService;
 import br.com.rodrigo.gestortarefas.api.services.ICliente;
 import br.com.rodrigo.gestortarefas.api.services.IItemPedido;
 import br.com.rodrigo.gestortarefas.api.services.IPagamento;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -54,10 +56,15 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
     private final IStatus statusService;
     private final IProduto produtoService;
     private final SseService sseService;
+    private final HorarioFuncionamentoService horarioFuncionamentoService;
 
     @Override
     @Transactional
     public VendaResponse criar(VendaForm vendaForm, Long id) {
+//        if (!horarioFuncionamentoService.estaAbertoAgora()) {
+//            throw new ViolacaoIntegridadeDadosException(
+//                    MensagensError.HORARIO_FUNCIONAMENTO_FECHADO.getMessage());
+//        }
         Venda venda = criaVenda(vendaForm, id);
         venda = vendaRepository.save(venda);
         salvarHistoricoStatus(venda, venda.getStatus(), venda.getStatus().getDescricao());
@@ -156,6 +163,11 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
             item.calcularValorTotal();
             valorTotal = valorTotal.add(item.getValorTotal());
         }
+
+        BigDecimal porcentagemPagamento = venda.getPagamento().getPorcentagemAcrescimo();
+        BigDecimal fatorPorcentagem = BigDecimal.ONE.add(
+                porcentagemPagamento.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP ));
+        valorTotal = valorTotal.multiply(fatorPorcentagem);
         venda.setValorTotal(valorTotal);
     }
 

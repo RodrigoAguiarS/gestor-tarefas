@@ -69,4 +69,11 @@ public class ValidadorUtil {
             }
         }
     }
+
+    public void validarApagarEmpresa(Long idEmpresa) {
+        if (!usuarioRepository.existsByEmpresaId(idEmpresa)) {
+            throw new ViolacaoIntegridadeDadosException(
+                    MensagensError.EMPRESA_NAO_PODE_SER_APAGADA.getMessage(idEmpresa));
+        }
+    }
 }

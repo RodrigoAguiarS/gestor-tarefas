@@ -32,15 +32,8 @@ public class ClienteServiceImpl implements ICliente {
     private final IUsuario usuarioService;
 
     @Override
-    public ClienteResponse criar(ClienteForm clienteForm) {
-        Cliente cliente = criaCliente(clienteForm, null);
-        cliente = clienteRepository.save(cliente);
-        return construirDto(cliente);
-    }
-
-    @Override
-    public ClienteResponse atualizar(Long id, ClienteForm clienteForm) {
-        Cliente cliente = criaCliente(clienteForm, id);
+    public ClienteResponse criar(Long idCliente, ClienteForm clienteForm) {
+        Cliente cliente = criaCliente(clienteForm, idCliente);
         cliente = clienteRepository.save(cliente);
         return construirDto(cliente);
     }
@@ -58,7 +51,6 @@ public class ClienteServiceImpl implements ICliente {
     public Optional<ClienteResponse> consultarPorId(Long id) {
         return clienteRepository.findById(id).map(this::construirDto);
     }
-
 
     @Override
     public Optional<ClienteResponse> getClienteLogado() {
@@ -79,35 +71,35 @@ public class ClienteServiceImpl implements ICliente {
         return clientes.map(this::construirDto);
     }
 
-    private Cliente criaCliente(ClienteForm clienteForm, Long id) {
-        validadorUtil.validarEmailUnico(clienteForm.getEmail(), id);
-        validadorUtil.validarCpfUnico(clienteForm.getCpf(), id);
-
-        Cliente cliente = id == null ? new Cliente() : clienteRepository.findById(id)
+    private Cliente criaCliente(ClienteForm clienteForm, Long idCliente) {
+        Cliente cliente = idCliente == null ? new Cliente() : clienteRepository.findById(idCliente)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.CLIENTE_NAO_ENCONTRADO_POR_ID.getMessage(id)));
+                        MensagensError.CLIENTE_NAO_ENCONTRADO_POR_ID.getMessage(idCliente)));
+
+        Long idUsuario = cliente.getUsuario() != null ? cliente.getUsuario().getId() : null;
+
+        validadorUtil.validarEmailUnico(clienteForm.getEmail(), idUsuario);
+        validadorUtil.validarCpfUnico(clienteForm.getCpf(), idUsuario);
 
         UsuarioForm usuarioForm = UsuarioForm.builder()
                 .email(clienteForm.getEmail())
                 .senha(clienteForm.getSenha())
+                .dataNascimento(clienteForm.getDataNascimento())
                 .perfil(Perfil.CLIENTE)
                 .nome(clienteForm.getNome())
                 .cpf(clienteForm.getCpf())
-                .dataNascimento(clienteForm.getDataNascimento())
                 .telefone(clienteForm.getTelefone())
                 .build();
 
-        Usuario usuario;
-        UsuarioResponse usuarioResponse;
-        if (id == null) {
-            usuarioResponse = usuarioService.criar(usuarioForm);
-        } else {
-            usuarioResponse = usuarioService.atualizar(cliente.getUsuario().getId(), usuarioForm);
-        }
-        usuario = new Usuario();
-        usuario.setId(usuarioResponse.getId());
+        UsuarioResponse usuarioResponse = usuarioService.criar(idUsuario, usuarioForm);
 
-        return ClienteMapper.formParaEntidade(clienteForm, usuario);
+        Usuario usuario = new Usuario();
+        usuario.setId(usuarioResponse.getId());
+        cliente.setUsuario(usuario);
+
+        cliente.setEndereco(ClienteMapper.formParaEntidade(clienteForm, usuario).getEndereco());
+
+        return cliente;
     }
 
     private ClienteResponse construirDto(Cliente cliente) {

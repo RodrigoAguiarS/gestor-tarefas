@@ -1,7 +1,6 @@
 package br.com.rodrigo.gestortarefas.api.teste;
 
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
-import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
 import br.com.rodrigo.gestortarefas.api.model.Cliente;
 import br.com.rodrigo.gestortarefas.api.model.Endereco;
 import br.com.rodrigo.gestortarefas.api.model.Pessoa;
@@ -36,9 +35,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -101,36 +100,16 @@ class ClienteServiceImplTest {
 
     @Test
     void criar_DeveRetornarClienteCriado() {
-        when(usuarioService.criar(any(UsuarioForm.class))).thenReturn(usuarioResponse);
+        when(usuarioService.criar(isNull(), any(UsuarioForm.class))).thenReturn(usuarioResponse);
         when(clienteRepository.save(any(Cliente.class))).thenReturn(cliente);
-        doNothing().when(validadorUtil).validarEmailUnico(anyString(), any());
-        doNothing().when(validadorUtil).validarCpfUnico(anyString(), any());
 
-        ClienteResponse resultado = clienteService.criar(clienteForm);
+        ClienteResponse resultado = clienteService.criar(null, clienteForm);
 
         assertNotNull(resultado);
         assertEquals(cliente.getId(), resultado.getId());
         assertEquals(clienteForm.getEmail(), resultado.getEmail());
         assertEquals(clienteForm.getNome(), resultado.getNome());
-        verify(usuarioService, times(1)).criar(any(UsuarioForm.class));
-        verify(clienteRepository, times(1)).save(any(Cliente.class));
-    }
-
-    @Test
-    void atualizar_DeveRetornarClienteAtualizado() {
-        Long id = 1L;
-        when(clienteRepository.findById(id)).thenReturn(Optional.of(cliente));
-        when(usuarioService.atualizar(any(), any(UsuarioForm.class))).thenReturn(usuarioResponse);
-        when(clienteRepository.save(any(Cliente.class))).thenReturn(cliente);
-        doNothing().when(validadorUtil).validarEmailUnico(anyString(), any());
-        doNothing().when(validadorUtil).validarCpfUnico(anyString(), any());
-
-        ClienteResponse resultado = clienteService.atualizar(id, clienteForm);
-
-        assertNotNull(resultado);
-        assertEquals(cliente.getId(), resultado.getId());
-        assertEquals(clienteForm.getEmail(), resultado.getEmail());
-        verify(usuarioService, times(1)).atualizar(any(), any(UsuarioForm.class));
+        verify(usuarioService, times(1)).criar(isNull(), any(UsuarioForm.class));
         verify(clienteRepository, times(1)).save(any(Cliente.class));
     }
 
@@ -175,24 +154,13 @@ class ClienteServiceImplTest {
     }
 
     @Test
-    void criar_QuandoEmailJaExiste_DeveLancarExcecao() {
-        doThrow(new ViolacaoIntegridadeDadosException("Email já cadastrado"))
-                .when(validadorUtil).validarEmailUnico(anyString(), any());
-
-        assertThrows(ViolacaoIntegridadeDadosException.class,
-                () -> clienteService.criar(clienteForm));
-        verify(clienteRepository, never()).save(any());
-        verify(usuarioService, never()).criar(any());
-    }
-
-    @Test
     void atualizar_QuandoClienteNaoEncontrado_DeveLancarExcecao() {
         Long id = 1L;
         when(clienteRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(ObjetoNaoEncontradoException.class,
-                () -> clienteService.atualizar(id, clienteForm));
+                () -> clienteService.criar(id, clienteForm));
         verify(clienteRepository, never()).save(any());
-        verify(usuarioService, never()).atualizar(any(), any());
+        verify(usuarioService, never()).criar(any(), any());
     }
 }

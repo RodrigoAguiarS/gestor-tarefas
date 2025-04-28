@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IUsuario {
-    UsuarioResponse criar(UsuarioForm usuarioForm);
-    UsuarioResponse atualizar(Long id, UsuarioForm usuarioForm);
+    UsuarioResponse criar(Long idUsuario, UsuarioForm usuarioForm);
     void deletar(Long id);
     Optional<UsuarioResponse> consultarPorId(Long id);
     Page<UsuarioResponse> buscar(int page, int size, String sort, String email,

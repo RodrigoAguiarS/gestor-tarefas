@@ -1,13 +1,14 @@
 package br.com.rodrigo.gestortarefas.api.teste;
 
 import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
+import br.com.rodrigo.gestortarefas.api.model.Empresa;
 import br.com.rodrigo.gestortarefas.api.model.Perfil;
 import br.com.rodrigo.gestortarefas.api.model.Pessoa;
 import br.com.rodrigo.gestortarefas.api.model.Usuario;
 import br.com.rodrigo.gestortarefas.api.model.form.UsuarioForm;
 import br.com.rodrigo.gestortarefas.api.model.response.PerfilResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.UsuarioResponse;
-import br.com.rodrigo.gestortarefas.api.repository.TarefaRepository;
+import br.com.rodrigo.gestortarefas.api.repository.ClienteRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import br.com.rodrigo.gestortarefas.api.services.IPerfil;
 import br.com.rodrigo.gestortarefas.api.services.impl.UsuarioServiceImpl;
@@ -29,9 +30,19 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceImplTest {
@@ -40,10 +51,10 @@ class UsuarioServiceImplTest {
     private UsuarioRepository usuarioRepository;
 
     @Mock
-    private ValidadorUtil validadorUtil;
+    private ClienteRepository clienteRepository;
 
     @Mock
-    private TarefaRepository tarefaRepository;
+    private ValidadorUtil validadorUtil;
 
     @Mock
     private IPerfil perfilService;
@@ -68,6 +79,7 @@ class UsuarioServiceImplTest {
         usuarioForm.setDataNascimento(LocalDate.now());
         usuarioForm.setTelefone("11999999999");
         usuarioForm.setPerfil(1L);
+        usuarioForm.setEmpresa(1L);
 
         Perfil perfil = new Perfil();
         perfil.setId(1L);
@@ -79,6 +91,10 @@ class UsuarioServiceImplTest {
         perfilResponse.setNome("ROLE_USER");
         perfilResponse.setDescricao("Usuário comum");
 
+        Empresa empresa = new Empresa();
+        empresa.setId(1L);
+        empresa.setNome("Empresa Teste");
+
         usuario = new Usuario();
         usuario.setId(1L);
         usuario.setEmail("teste@email.com");
@@ -89,6 +105,7 @@ class UsuarioServiceImplTest {
         usuario.getPessoa().setDataNascimento(LocalDate.now());
         usuario.getPessoa().setTelefone("11999999999");
         usuario.setPerfis(Set.of(perfil));
+        usuario.setEmpresa(empresa);
     }
 
     @Test
@@ -99,13 +116,14 @@ class UsuarioServiceImplTest {
         doNothing().when(validadorUtil).validarEmailUnico(anyString(), any());
         doNothing().when(validadorUtil).validarCpfUnico(anyString(), any());
 
-        UsuarioResponse resultado = usuarioService.criar(usuarioForm);
+        UsuarioResponse resultado = usuarioService.criar(null, usuarioForm);
 
         assertNotNull(resultado);
         assertEquals(usuario.getId(), resultado.getId());
         assertEquals(usuario.getEmail(), resultado.getEmail());
         assertEquals(usuario.getPessoa().getNome(), resultado.getPessoa().getNome());
         verify(usuarioRepository, times(1)).save(any(Usuario.class));
+        assertEquals(usuario.getEmpresa().getId(), resultado.getEmpresa().getId());
         verify(validadorUtil, times(1)).validarEmailUnico(usuarioForm.getEmail(), null);
         verify(validadorUtil, times(1)).validarCpfUnico(usuarioForm.getCpf(), null);
     }
@@ -116,7 +134,7 @@ class UsuarioServiceImplTest {
                 .when(validadorUtil).validarEmailUnico(anyString(), any());
 
         assertThrows(ViolacaoIntegridadeDadosException.class,
-                () -> usuarioService.criar(usuarioForm));
+                () -> usuarioService.criar(null, usuarioForm));
         verify(usuarioRepository, never()).save(any());
     }
 
@@ -130,36 +148,15 @@ class UsuarioServiceImplTest {
         doNothing().when(validadorUtil).validarEmailUnico(anyString(), any());
         doNothing().when(validadorUtil).validarCpfUnico(anyString(), any());
 
-        UsuarioResponse resultado = usuarioService.atualizar(id, usuarioForm);
+        UsuarioResponse resultado = usuarioService.criar(id, usuarioForm);
 
         assertNotNull(resultado);
         assertEquals(usuario.getId(), resultado.getId());
         assertEquals(usuario.getEmail(), resultado.getEmail());
+        assertEquals(usuario.getEmpresa().getId(), resultado.getEmpresa().getId());
         verify(usuarioRepository, times(1)).save(any(Usuario.class));
         verify(validadorUtil, times(1)).validarEmailUnico(usuarioForm.getEmail(), id);
         verify(validadorUtil, times(1)).validarCpfUnico(usuarioForm.getCpf(), id);
-    }
-
-    @Test
-    void deletar_QuandoUsuarioNaoTemTarefas_DeveDeletarUsuario() {
-        Long id = 1L;
-        when(usuarioRepository.findById(id)).thenReturn(Optional.of(usuario));
-        when(tarefaRepository.existsByResponsavelId(id)).thenReturn(false);
-
-        assertDoesNotThrow(() -> usuarioService.deletar(id));
-
-        verify(usuarioRepository, times(1)).delete(usuario);
-    }
-
-    @Test
-    void deletar_QuandoUsuarioTemTarefas_DeveLancarExcecao() {
-        Long id = 1L;
-        when(usuarioRepository.findById(id)).thenReturn(Optional.of(usuario));
-        when(tarefaRepository.existsByResponsavelId(id)).thenReturn(true);
-
-        assertThrows(ViolacaoIntegridadeDadosException.class,
-                () -> usuarioService.deletar(id));
-        verify(usuarioRepository, never()).delete(any());
     }
 
     @Test

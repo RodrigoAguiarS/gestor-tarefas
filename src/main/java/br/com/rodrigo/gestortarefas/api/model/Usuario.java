@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
@@ -52,6 +53,10 @@ public class Usuario extends EntidadeBase implements UserDetails {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_pessoa")
     private Pessoa pessoa = new Pessoa();
+
+    @ManyToOne
+    @JoinColumn(name = "id_empresa", nullable = false)
+    private Empresa empresa;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

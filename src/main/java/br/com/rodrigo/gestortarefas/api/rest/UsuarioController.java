@@ -34,13 +34,13 @@ public class UsuarioController extends ControllerBase<UsuarioResponse> {
 
     @PostMapping
     public ResponseEntity<UsuarioResponse> criar(@RequestBody @Valid UsuarioForm usuarioForm) {
-        UsuarioResponse response = usuarioService.criar(usuarioForm);
+        UsuarioResponse response = usuarioService.criar(null, usuarioForm);
         return responderItemCriadoComURI(response, ServletUriComponentsBuilder.fromCurrentRequest(), "/{id}", response.getId().toString());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponse> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioForm usuarioForm) {
-        UsuarioResponse response = usuarioService.atualizar(id, usuarioForm);
+        UsuarioResponse response = usuarioService.criar(id, usuarioForm);
         return responderSucessoComItem(response);
     }
 

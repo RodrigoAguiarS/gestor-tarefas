@@ -45,4 +45,6 @@ public class UsuarioForm {
 
     @NotNull
     private Long perfil;
+
+    private Long empresa;
 }
