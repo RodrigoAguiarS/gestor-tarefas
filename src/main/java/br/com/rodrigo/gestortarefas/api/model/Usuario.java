@@ -1,6 +1,5 @@
 package br.com.rodrigo.gestortarefas.api.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -50,9 +49,9 @@ public class Usuario extends EntidadeBase implements UserDetails {
     )
     private Set<Perfil> perfis = new HashSet<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "id_pessoa")
-    private Pessoa pessoa = new Pessoa();
+    private Pessoa pessoa;
 
     @ManyToOne
     @JoinColumn(name = "id_empresa", nullable = false)

@@ -17,14 +17,14 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @SuperBuilder
-public class Cliente extends EntidadeBase {
+public class Funcionario extends EntidadeBase {
 
     @OneToOne(cascade = CascadeType.ALL)
     @MapsId
     @JoinColumn(name = "id_pessoa")
     private Pessoa pessoa;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_endereco")
-    private Endereco endereco = new Endereco();
+    private String cargo;
+    private String matricula;
+    private Double salario;
 }

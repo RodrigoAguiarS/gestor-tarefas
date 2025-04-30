@@ -1,6 +1,15 @@
 package br.com.rodrigo.gestortarefas.api.teste;
 
-import br.com.rodrigo.gestortarefas.api.model.*;
+import br.com.rodrigo.gestortarefas.api.model.Categoria;
+import br.com.rodrigo.gestortarefas.api.model.Cliente;
+import br.com.rodrigo.gestortarefas.api.model.ItemVenda;
+import br.com.rodrigo.gestortarefas.api.model.Pagamento;
+import br.com.rodrigo.gestortarefas.api.model.Pessoa;
+import br.com.rodrigo.gestortarefas.api.model.Produto;
+import br.com.rodrigo.gestortarefas.api.model.Status;
+import br.com.rodrigo.gestortarefas.api.model.TipoVenda;
+import br.com.rodrigo.gestortarefas.api.model.Usuario;
+import br.com.rodrigo.gestortarefas.api.model.Venda;
 import br.com.rodrigo.gestortarefas.api.model.response.VendaResponse;
 import br.com.rodrigo.gestortarefas.api.repository.VendaRepository;
 import br.com.rodrigo.gestortarefas.api.services.impl.VendaServiceImpl;
@@ -11,14 +20,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -131,8 +146,8 @@ class VendaServiceImplTest {
         Usuario usuario = new Usuario();
         Pessoa pessoa = new Pessoa();
         pessoa.setNome(nomeCliente);
-        usuario.setPessoa(pessoa);
-        cliente.setUsuario(usuario);
+        pessoa.setUsuario(usuario);
+        cliente.setPessoa(pessoa);
         venda.setCliente(cliente);
 
         Status status = new Status();

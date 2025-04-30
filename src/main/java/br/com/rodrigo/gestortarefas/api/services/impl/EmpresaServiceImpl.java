@@ -37,7 +37,6 @@ public class EmpresaServiceImpl implements IEmpresa {
         Empresa empresa = empresaRepository.findById(id)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.EMPRESA_NAO_ENCONTRADA.getMessage(id)));
-        validadorUtil.validarApagarEmpresa(empresa.getId());
         empresaRepository.delete(empresa);
     }
 

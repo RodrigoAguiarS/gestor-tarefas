@@ -18,6 +18,7 @@ public enum MensagensError {
     TOKEN_INVALIDO("Token inválido"),
     USUARIO_NAO_ENCONTRADO_POR_ID("Usuário não encontrado para o id %s"),
     CLIENTE_NAO_ENCONTRADO_POR_ID("Cliente não encontrado para o id %s"),
+    FUNCIONARIO_NAO_ENCONTRADO_POR_ID("Funcionário não encontrado para o id %s"),
     PAGAMENTO_NAO_ENCONTRADO_POR_ID("Forma de pagamento não encontrado para o id %s"),
     PERFIL_NAO_ENCONTRADO("Perfil não encontrado para o id %s"),
     PRODUTO_NAO_ENCONTRADO("Produto não encontrado para o id %s"),

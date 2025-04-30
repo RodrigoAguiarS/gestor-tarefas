@@ -28,7 +28,7 @@ public class MensagemUtil {
     public static String criarMensagemVendaRealizada(Venda venda) {
         return String.format(TEMPLATE_VENDA_REALIZADA,
                 venda.getId(),
-                venda.getCliente().getUsuario().getPessoa().getNome(),
+                venda.getCliente().getPessoa().getNome(),
                 venda.getValorTotal(),
                 venda.getTipoVenda().name(),
                 venda.getPagamento().getNome(),
@@ -38,7 +38,7 @@ public class MensagemUtil {
     public static String criarMensagemMudancaStatusVenda(Venda venda, String observacao) {
         return String.format(TEMPLATE_MUDANCA_STATUS_VENDA,
                 venda.getId(),
-                venda.getCliente().getUsuario().getPessoa().getNome(),
+                venda.getCliente().getPessoa().getNome(),
                 venda.getStatus().getNome(),
                 observacao != null ? observacao : "Sem observações",
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));

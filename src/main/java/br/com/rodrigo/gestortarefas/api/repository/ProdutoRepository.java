@@ -2,6 +2,8 @@ package br.com.rodrigo.gestortarefas.api.repository;
 
 
 import br.com.rodrigo.gestortarefas.api.model.Produto;
+import br.com.rodrigo.gestortarefas.api.model.response.GraficoProduto;
+import br.com.rodrigo.gestortarefas.api.model.response.GraficoVenda;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
@@ -43,6 +46,34 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
                           @Param("quantidade") Integer quantidade,
                           @Param("categoriaId") Long categoriaId,
                           Pageable pageable);
+
+    @Query("SELECT new br.com.rodrigo.gestortarefas.api.model.response.GraficoVenda(p.nome, SUM(iv.quantidade)) " +
+            "FROM Produto p " +
+            "JOIN ItemVenda iv ON iv.produto.id = p.id " +
+            "JOIN Venda v ON v.id = iv.venda.id " +
+            "WHERE v.status.id <> :statusCancelado " +
+            "GROUP BY p.nome " +
+            "ORDER BY SUM(iv.quantidade) DESC")
+    List<GraficoVenda> findVendasParaGrafico(@Param("statusCancelado") Long statusCancelado);
+
+    @Query("SELECT new br.com.rodrigo.gestortarefas.api.model.response.GraficoProduto(p.nome, SUM(iv.quantidade * iv.preco)) " +
+            "FROM Produto p " +
+            "JOIN ItemVenda iv ON iv.produto.id = p.id " +
+            "JOIN Venda v ON v.id = iv.venda.id " +
+            "WHERE v.status.id <> :statusCancelado " +
+            "GROUP BY p.nome " +
+            "ORDER BY SUM(iv.quantidade * iv.preco) DESC")
+    List<GraficoProduto> findFaturamentoPorProduto(@Param("statusCancelado") Long statusCancelado);
+
+    @Query("SELECT new br.com.rodrigo.gestortarefas.api.model.response.GraficoVenda(c.nome, SUM(iv.quantidade)) " +
+            "FROM Produto p " +
+            "JOIN p.categoria c " +
+            "JOIN ItemVenda iv ON iv.produto.id = p.id " +
+            "JOIN Venda v ON v.id = iv.venda.id " +
+            "WHERE v.status.id <> :statusCancelado " +
+            "GROUP BY c.nome " +
+            "ORDER BY SUM(iv.quantidade) DESC")
+    List<GraficoVenda> findVendasPorCategoria(@Param("statusCancelado") Long statusCancelado);
 
     @Override
     @CacheEvict(value = "produtos", allEntries = true)

@@ -15,12 +15,12 @@ import java.util.Optional;
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     @Cacheable("clientes")
-    Optional <Cliente> findClienteByUsuarioId(Long usuarioId);
+    Optional <Cliente> findClienteByPessoaId(Long idPessoa);
 
     @Cacheable("clientes")
     @Query("SELECT c FROM Cliente c " +
-            "JOIN c.usuario u " +
-            "JOIN u.pessoa p " +
+            "JOIN c.pessoa p " +
+            "JOIN p.usuario u " +
             "JOIN c.endereco e " +
             "WHERE (:nome IS NULL OR LOWER(p.nome) LIKE %:nome%) " +
             "AND (:email IS NULL OR LOWER(u.email) LIKE %:email%) " +
@@ -28,6 +28,9 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
             "AND (:cidade IS NULL OR LOWER(e.cidade) LIKE %:cidade%) " +
             "AND (:estado IS NULL OR LOWER(e.estado) LIKE %:estado%) " +
             "AND (:cep IS NULL OR e.cep = :cep) " +
+            "AND c.ativo = true " +
+            "AND p.ativo = true " +
+            "AND u.ativo = true " +
             "ORDER BY p.nome ASC")
     Page<Cliente> findAll(@Param("email") String email,
                           @Param("nome") String nome,

@@ -35,9 +35,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByPerfisId(Long idPerfil);
 
     @Cacheable("usuarios")
-    boolean existsByEmpresaId(Long idEmpresa);
-
-    @Cacheable("usuarios")
     @Query("SELECT u FROM Usuario u " +
             "JOIN u.pessoa p " +
             "JOIN u.perfis pf " +

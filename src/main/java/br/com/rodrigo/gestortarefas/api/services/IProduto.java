@@ -2,6 +2,8 @@ package br.com.rodrigo.gestortarefas.api.services;
 
 import br.com.rodrigo.gestortarefas.api.model.Produto;
 import br.com.rodrigo.gestortarefas.api.model.form.ProdutoForm;
+import br.com.rodrigo.gestortarefas.api.model.response.GraficoProduto;
+import br.com.rodrigo.gestortarefas.api.model.response.GraficoVenda;
 import br.com.rodrigo.gestortarefas.api.model.response.ProdutoResponse;
 import org.springframework.data.domain.Page;
 
@@ -20,4 +22,10 @@ public interface IProduto {
                                       Long categoriaId);
 
     List<Produto> buscarPorIds(List<Long> produtoIds);
+
+    List<GraficoVenda> obterVendasParaGrafico();
+
+    List<GraficoVenda> obterVendasPorCategoria();
+
+    List<GraficoProduto> obterFaturamentoPorProduto();
 }

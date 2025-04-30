@@ -26,26 +26,15 @@ public class EmpresaMapper {
     }
 
     public static EmpresaResponse entidadeParaResponse(Empresa empresa) {
-        EmpresaResponse response = new EmpresaResponse();
-        response.setId(empresa.getId());
-        response.setNome(empresa.getNome());
-        response.setCnpj(empresa.getCnpj());
-
-        if (empresa.getEndereco() != null) {
-            Endereco endereco = empresa.getEndereco();
-            String enderecoCompleto = String.format("%s, nº %s - %s, %s - %s, CEP: %s",
-                    endereco.getRua(),
-                    endereco.getNumero(),
-                    endereco.getBairro(),
-                    endereco.getCidade(),
-                    endereco.getEstado(),
-                    endereco.getCep());
-
-            response.setEndereco(enderecoCompleto);
-        }
-
-        response.setTelefone(empresa.getTelefone());
-        return response;
+        return EmpresaResponse.builder()
+                .id(empresa.getId())
+                .nome(empresa.getNome())
+                .cnpj(empresa.getCnpj())
+                .endereco(empresa.getEndereco())
+                .horariosFuncionamento(empresa.getHorariosFuncionamento() != null ?
+                        HorarioFuncionamentoMapper.listaEntidadeParaResponse(empresa.getHorariosFuncionamento()) : null)
+                .telefone(empresa.getTelefone())
+                .build();
     }
 
     public static void atualizarEntidade(Empresa empresa, EmpresaForm form) {

@@ -1,24 +1,28 @@
 package br.com.rodrigo.gestortarefas.api.model.response;
 
-import br.com.rodrigo.gestortarefas.api.model.Endereco;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EmpresaResponse {
+public class FuncionarioResponse {
     private Long id;
     private String nome;
-    private String cnpj;
-    private Endereco endereco;
-    private List<HorarioFuncionamentoResponse> horariosFuncionamento;
+    private String cpf;
+    private LocalDate dataNascimento;
     private String telefone;
+    private String email;
+    private String cargo;
+    private String matricula;
+    private Double salario;
+    private Set<PerfilResponse> perfis;
 }

@@ -6,18 +6,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UsuarioResponse {
+public class HorarioFuncionamentoResponse {
     private Long id;
-    private String email;
-    private PessoaResponse pessoa;
-    private EmpresaResponse empresa;
-    private Set<PerfilResponse> perfis;
-    private Boolean ativo;
+    private DayOfWeek diaSemana;
+    private LocalTime horaAbertura;
+    private LocalTime horaFechamento;
+    private Boolean fechado;
 }

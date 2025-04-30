@@ -6,8 +6,11 @@ import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.model.Categoria;
 import br.com.rodrigo.gestortarefas.api.model.Produto;
+import br.com.rodrigo.gestortarefas.api.model.Status;
 import br.com.rodrigo.gestortarefas.api.model.form.ProdutoForm;
 import br.com.rodrigo.gestortarefas.api.model.response.CategoriaResponse;
+import br.com.rodrigo.gestortarefas.api.model.response.GraficoProduto;
+import br.com.rodrigo.gestortarefas.api.model.response.GraficoVenda;
 import br.com.rodrigo.gestortarefas.api.model.response.ProdutoResponse;
 import br.com.rodrigo.gestortarefas.api.repository.ProdutoRepository;
 import br.com.rodrigo.gestortarefas.api.services.ICategoria;
@@ -116,6 +119,20 @@ public class ProdutoServiceImpl implements IProduto {
         produto.setArquivosUrl(produtoForm.getArquivosUrl());
 
         return produto;
+    }
+    @Override
+    public List<GraficoVenda> obterVendasParaGrafico() {
+        return produtoRepository.findVendasParaGrafico(Status.CANCELADO);
+    }
+
+    @Override
+    public List<GraficoVenda> obterVendasPorCategoria() {
+        return produtoRepository.findVendasPorCategoria(Status.CANCELADO);
+    }
+
+    @Override
+    public List<GraficoProduto> obterFaturamentoPorProduto() {
+        return produtoRepository.findFaturamentoPorProduto(Status.CANCELADO);
     }
 
     private ProdutoResponse construirDto(Produto produto) {

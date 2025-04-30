@@ -2,6 +2,7 @@ package br.com.rodrigo.gestortarefas.api.util;
 
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
+import br.com.rodrigo.gestortarefas.api.repository.PessoaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.ProdutoRepository;
 import br.com.rodrigo.gestortarefas.api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,15 +14,16 @@ public class ValidadorUtil {
 
     private final UsuarioRepository usuarioRepository;
     private final ProdutoRepository produtoRepository;
+    private final PessoaRepository pessoaRepository;
 
-    public void validarCpfUnico(String cpf, Long idUsuario) {
-        if (idUsuario == null) {
-            if (usuarioRepository.existsByPessoaCpf(cpf)) {
+    public void validarCpfUnico(String cpf, Long idPessoa) {
+        if (idPessoa == null) {
+            if (pessoaRepository.existsByCpf(cpf)) {
                 throw new ViolacaoIntegridadeDadosException(
                         MensagensError.CPF_JA_CADASTRADO.getMessage(cpf));
             }
         } else {
-            if (usuarioRepository.existsByPessoaCpfAndIdNot(cpf, idUsuario)) {
+            if (pessoaRepository.existsByCpfAndIdNot(cpf, idPessoa)) {
                 throw new ViolacaoIntegridadeDadosException(
                         MensagensError.CPF_JA_CADASTRADO.getMessage(cpf));
             }
@@ -67,13 +69,6 @@ public class ValidadorUtil {
                 throw new ViolacaoIntegridadeDadosException(
                         MensagensError.NOME_PRODUTO_DUPLICADO.getMessage(nome));
             }
-        }
-    }
-
-    public void validarApagarEmpresa(Long idEmpresa) {
-        if (!usuarioRepository.existsByEmpresaId(idEmpresa)) {
-            throw new ViolacaoIntegridadeDadosException(
-                    MensagensError.EMPRESA_NAO_PODE_SER_APAGADA.getMessage(idEmpresa));
         }
     }
 }

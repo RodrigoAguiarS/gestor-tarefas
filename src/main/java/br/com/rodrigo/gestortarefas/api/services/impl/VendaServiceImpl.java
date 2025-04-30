@@ -18,6 +18,7 @@ import br.com.rodrigo.gestortarefas.api.model.form.VendaForm;
 import br.com.rodrigo.gestortarefas.api.model.response.ClienteResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.PagamentoResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.StatusResponse;
+import br.com.rodrigo.gestortarefas.api.model.response.UsuarioResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.VendaResponse;
 import br.com.rodrigo.gestortarefas.api.repository.HistoricoStatusVendaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.VendaRepository;
@@ -27,6 +28,7 @@ import br.com.rodrigo.gestortarefas.api.services.IItemPedido;
 import br.com.rodrigo.gestortarefas.api.services.IPagamento;
 import br.com.rodrigo.gestortarefas.api.services.IProduto;
 import br.com.rodrigo.gestortarefas.api.services.IStatus;
+import br.com.rodrigo.gestortarefas.api.services.IUsuario;
 import br.com.rodrigo.gestortarefas.api.services.IVenda;
 import br.com.rodrigo.gestortarefas.api.services.SseService;
 import br.com.rodrigo.gestortarefas.api.util.MensagemUtil;
@@ -51,6 +53,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
 
     private final VendaRepository vendaRepository;
     private final HistoricoStatusVendaRepository historicoStatusVendaRepository;
+    private final IUsuario usuarioService;
     private final ICliente clienteService;
     private final IPagamento pagamentoService;
     private final IStatus statusService;
@@ -82,9 +85,8 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
 
     @Override
     public Page<VendaResponse> listarPedidosCliente(int page, int size, String sort) {
-        ClienteResponse cliente = clienteService.getClienteLogado()
-                .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.CLIENTE_NAO_AUTORIZADO.getMessage()));
+
+        UsuarioResponse usuario = usuarioService.obterUsuarioLogado();
 
         String[] sortParams = sort.split(",");
         Sort.Direction direction = sortParams.length > 1 ?
@@ -92,7 +94,8 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
 
-        Page<Venda> vendas = vendaRepository.findByClienteIdOrderByDataVendaDesc(cliente.getId(), pageable);
+        Page<Venda> vendas = vendaRepository.findByClienteIdOrderByDataVendaDesc(
+                usuario.getPessoa().getId(), pageable);
 
         return vendas.map(VendaMapper::entidadeParaResponse);
     }
@@ -188,7 +191,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
         salvarHistoricoStatus(venda, novoStatus, novoStatus.getDescricao());
 
         String mensagem = MensagemUtil.criarMensagemMudancaStatusVenda(venda, novoStatus.getDescricao());
-        sseService.notificarUsuario(venda.getCliente().getUsuario().getId(), mensagem);
+        sseService.notificarUsuario(venda.getCliente().getPessoa().getUsuario().getId(), mensagem);
 
         return VendaMapper.entidadeParaResponse(venda);
     }
