@@ -22,6 +22,7 @@ public enum MensagensError {
     PAGAMENTO_NAO_ENCONTRADO_POR_ID("Forma de pagamento não encontrado para o id %s"),
     PERFIL_NAO_ENCONTRADO("Perfil não encontrado para o id %s"),
     PRODUTO_NAO_ENCONTRADO("Produto não encontrado para o id %s"),
+    ESTOQUE_INSUFICIENTE("Estoque insuficiente para o produto %s"),
     VENDA_NAO_ENCONTRADA("Venda não encontrado para o id %s"),
     CODIGO_BARRAS_DUPLICADO("Código de barras %s já cadastrado"),
     NOME_PRODUTO_DUPLICADO("Nome do produto %s já cadastrado"),

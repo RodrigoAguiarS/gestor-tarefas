@@ -33,13 +33,13 @@ public class ProdutoController extends ControllerBase<ProdutoResponse> {
 
     @PostMapping
     public ResponseEntity<ProdutoResponse> criar(@RequestBody @Valid ProdutoForm produtoForm,  UriComponentsBuilder uriBuilder) {
-        ProdutoResponse response = produtoService.criar(produtoForm);
+        ProdutoResponse response = produtoService.criar( null, produtoForm);
         return responderItemCriadoComURI(response, uriBuilder, "/tarefas/{id}", response.getId().toString());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProdutoResponse> atualizar(@PathVariable Long id, @RequestBody @Valid ProdutoForm produtoForm) {
-        ProdutoResponse response = produtoService.atualizar(id, produtoForm);
+        ProdutoResponse response = produtoService.criar(id, produtoForm);
         return responderSucessoComItem(response);
     }
 

@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IProduto {
-    ProdutoResponse criar(ProdutoForm produtoForm);
-    ProdutoResponse atualizar(Long id, ProdutoForm produtoForm);
+    ProdutoResponse criar(Long idProduto, ProdutoForm produtoForm);
     void deletar(Long id);
     Optional<ProdutoResponse> consultarPorId(Long id);
     Produto buscarPorId(Long id);

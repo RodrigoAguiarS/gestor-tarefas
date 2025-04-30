@@ -42,6 +42,8 @@ public class FuncionarioServiceImpl implements IFuncionario {
     @Override
     public FuncionarioResponse criar(Long idCliente, FuncionarioForm funcionarioForm) {
         Funcionario funcionario = criarFuncionario(funcionarioForm, idCliente);
+        validadorUtil.validarCpfUnico(funcionarioForm.getCpf(), funcionario.getId());
+        validadorUtil.validarEmailUnico(funcionarioForm.getEmail(), funcionario.getPessoa().getUsuario().getId());
         funcionario = funcionarioRepository.save(funcionario);
         return construirDto(funcionario);
     }
@@ -75,9 +77,6 @@ public class FuncionarioServiceImpl implements IFuncionario {
         Funcionario funcionario = idFuncionario != null ? funcionarioRepository.findById(idFuncionario)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.CLIENTE_NAO_ENCONTRADO_POR_ID.getMessage(idFuncionario))) : new Funcionario();
-
-        validadorUtil.validarCpfUnico(funcionarioForm.getCpf(), funcionario.getPessoa().getId() != null ? funcionario.getPessoa().getId() : null);
-        validadorUtil.validarEmailUnico(funcionarioForm.getEmail(), funcionario.getPessoa().getUsuario() != null ? funcionario.getPessoa().getUsuario().getId() : null);
 
         PerfilResponse perfilResponse = perfilService.consultarPorId(funcionarioForm.getPerfil())
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(

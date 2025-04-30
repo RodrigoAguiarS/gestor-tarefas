@@ -7,11 +7,16 @@ import br.com.rodrigo.gestortarefas.api.conversor.StatusMapper;
 import br.com.rodrigo.gestortarefas.api.conversor.VendaMapper;
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
+import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
+import br.com.rodrigo.gestortarefas.api.model.AcaoMovimentacao;
+import br.com.rodrigo.gestortarefas.api.model.EstoqueService;
 import br.com.rodrigo.gestortarefas.api.model.HistoricoStatusVenda;
 import br.com.rodrigo.gestortarefas.api.model.ItemVenda;
+import br.com.rodrigo.gestortarefas.api.model.OrigemMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.Perfil;
 import br.com.rodrigo.gestortarefas.api.model.Produto;
 import br.com.rodrigo.gestortarefas.api.model.Status;
+import br.com.rodrigo.gestortarefas.api.model.TipoMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.TipoVenda;
 import br.com.rodrigo.gestortarefas.api.model.Venda;
 import br.com.rodrigo.gestortarefas.api.model.form.VendaForm;
@@ -59,17 +64,19 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
     private final IStatus statusService;
     private final IProduto produtoService;
     private final SseService sseService;
+    private final EstoqueService estoqueService;
     private final HorarioFuncionamentoService horarioFuncionamentoService;
 
     @Override
     @Transactional
     public VendaResponse criar(VendaForm vendaForm, Long id) {
-//        if (!horarioFuncionamentoService.estaAbertoAgora()) {
-//            throw new ViolacaoIntegridadeDadosException(
-//                    MensagensError.HORARIO_FUNCIONAMENTO_FECHADO.getMessage());
-//        }
+        if (!horarioFuncionamentoService.estaAbertoAgora()) {
+            throw new ViolacaoIntegridadeDadosException(
+                    MensagensError.HORARIO_FUNCIONAMENTO_FECHADO.getMessage());
+        }
         Venda venda = criaVenda(vendaForm, id);
         venda = vendaRepository.save(venda);
+        processarMovimentacaoEstoque(venda, id);
         salvarHistoricoStatus(venda, venda.getStatus(), venda.getStatus().getDescricao());
         String mensagemVendaCriada = MensagemUtil.criarMensagemVendaRealizada(venda);
         sseService.notificarPorPerfil(mensagemVendaCriada, Perfil.ADMINSTRADOR);
@@ -202,5 +209,14 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
         historico.setStatus(novoStatus);
         historico.setObservacao(observacao);
         historicoStatusVendaRepository.save(historico);
+    }
+
+    private void processarMovimentacaoEstoque(Venda venda, Long id) {
+        AcaoMovimentacao acao = (id == null) ? AcaoMovimentacao.NOVA_VENDA : AcaoMovimentacao.ATUALIZACAO_VENDA;
+
+        for (ItemVenda item : venda.getItens()) {
+            estoqueService.processarMovimentacao(item, TipoMovimentacao.SAIDA,
+                    OrigemMovimentacao.VENDA, acao, venda.getId());
+        }
     }
 }

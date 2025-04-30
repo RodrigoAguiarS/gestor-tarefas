@@ -47,6 +47,8 @@ public class ClienteServiceImpl implements ICliente {
     @Override
     public ClienteResponse criar(Long idCliente, ClienteForm clienteForm) {
         Cliente cliente = criarCliente(clienteForm, idCliente);
+        validadorUtil.validarCpfUnico(clienteForm.getCpf(), cliente.getId());
+        validadorUtil.validarEmailUnico(clienteForm.getEmail(), cliente.getPessoa().getUsuario().getId());
         cliente = clienteRepository.save(cliente);
         return construirDto(cliente);
     }
@@ -91,8 +93,6 @@ public class ClienteServiceImpl implements ICliente {
         Cliente cliente = idCliente != null ? clienteRepository.findById(idCliente)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
                         MensagensError.CLIENTE_NAO_ENCONTRADO_POR_ID.getMessage(idCliente))) : new Cliente();
-        validadorUtil.validarCpfUnico(clienteForm.getCpf(), cliente.getPessoa().getId() != null ? cliente.getPessoa().getId() : null);
-        validadorUtil.validarEmailUnico(clienteForm.getEmail(), cliente.getPessoa().getUsuario() != null ? cliente.getPessoa().getUsuario().getId() : null);
 
         PerfilResponse perfilResponse = perfilService.consultarPorId(Perfil.CLIENTE)
                 .orElseThrow(() -> new ObjetoNaoEncontradoException(
