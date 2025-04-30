@@ -4,10 +4,17 @@ import br.com.rodrigo.gestortarefas.api.conversor.CategoriaMapper;
 import br.com.rodrigo.gestortarefas.api.conversor.ProdutoMapper;
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
+import br.com.rodrigo.gestortarefas.api.model.AcaoMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.Categoria;
+import br.com.rodrigo.gestortarefas.api.model.EstoqueService;
+import br.com.rodrigo.gestortarefas.api.model.OrigemMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.Produto;
+import br.com.rodrigo.gestortarefas.api.model.Status;
+import br.com.rodrigo.gestortarefas.api.model.TipoMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.form.ProdutoForm;
 import br.com.rodrigo.gestortarefas.api.model.response.CategoriaResponse;
+import br.com.rodrigo.gestortarefas.api.model.response.GraficoProduto;
+import br.com.rodrigo.gestortarefas.api.model.response.GraficoVenda;
 import br.com.rodrigo.gestortarefas.api.model.response.ProdutoResponse;
 import br.com.rodrigo.gestortarefas.api.repository.ProdutoRepository;
 import br.com.rodrigo.gestortarefas.api.services.ICategoria;
@@ -35,18 +42,13 @@ public class ProdutoServiceImpl implements IProduto {
     private final ProdutoRepository produtoRepository;
     private final S3StorageService s3StorageService;
     private final ValidadorUtil validadorUtil;
+    private final EstoqueService estoqueService;
 
     @Override
-    public ProdutoResponse criar(ProdutoForm produtoForm) {
-        Produto produto = criaProduto(produtoForm, null);
-        produto = produtoRepository.save(produto);
-        return construirDto(produto);
-    }
-
-    @Override
-    public ProdutoResponse atualizar(Long id, ProdutoForm produtoForm) {
+    public ProdutoResponse criar(Long id, ProdutoForm produtoForm) {
         Produto produto = criaProduto(produtoForm, id);
         produto = produtoRepository.save(produto);
+        movimentarEstoqueProduto(produto, produtoForm.getQuantidade(), id);
         return construirDto(produto);
     }
 
@@ -117,9 +119,31 @@ public class ProdutoServiceImpl implements IProduto {
 
         return produto;
     }
+    @Override
+    public List<GraficoVenda> obterVendasParaGrafico() {
+        return produtoRepository.findVendasParaGrafico(Status.CANCELADO);
+    }
+
+    @Override
+    public List<GraficoVenda> obterVendasPorCategoria() {
+        return produtoRepository.findVendasPorCategoria(Status.CANCELADO);
+    }
+
+    @Override
+    public List<GraficoProduto> obterFaturamentoPorProduto() {
+        return produtoRepository.findFaturamentoPorProduto(Status.CANCELADO);
+    }
 
     private ProdutoResponse construirDto(Produto produto) {
         return ProdutoMapper.entidadeParaResponse(produto);
 
+    }
+
+    private void movimentarEstoqueProduto(Produto produto, int quantidade, Long idProduto) {
+        TipoMovimentacao tipo = (idProduto == null) ? TipoMovimentacao.ENTRADA : TipoMovimentacao.AJUSTE;
+        OrigemMovimentacao origem = OrigemMovimentacao.PRODUTO;
+        AcaoMovimentacao acao = (idProduto == null) ? AcaoMovimentacao.CRIACAO_PRODUTO : AcaoMovimentacao.EDICAO_PRODUTO;
+
+        estoqueService.processarMovimentacaoProduto(produto, quantidade, tipo, origem, acao, produto.getId());
     }
 }

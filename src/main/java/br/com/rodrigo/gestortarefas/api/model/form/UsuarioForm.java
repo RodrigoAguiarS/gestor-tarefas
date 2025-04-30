@@ -20,8 +20,6 @@ import java.time.LocalDate;
 @Builder
 public class UsuarioForm {
 
-
-
     @Email
     @NotBlank
     private String email;
@@ -45,4 +43,6 @@ public class UsuarioForm {
 
     @NotNull
     private Long perfil;
+
+    private Long empresa;
 }

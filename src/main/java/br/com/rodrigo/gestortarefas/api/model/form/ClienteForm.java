@@ -39,4 +39,6 @@ public class ClienteForm {
     private String estado;
     @NotBlank
     private String cep;
+    private Long empresaId;
+
 }

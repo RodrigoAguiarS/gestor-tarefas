@@ -26,8 +26,8 @@ public interface VendaRepository extends JpaRepository<Venda, Long> {
     SELECT v
     FROM Venda v
     JOIN v.cliente c
-    JOIN c.usuario u
-    JOIN u.pessoa pe
+    JOIN c.pessoa pe
+    JOIN pe.usuario u
     JOIN v.status s
     JOIN v.pagamento p
     WHERE v.id           = COALESCE(:id, v.id)

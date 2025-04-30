@@ -3,24 +3,26 @@ package br.com.rodrigo.gestortarefas.api.model;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Builder
+@SuperBuilder
 public class Cliente extends EntidadeBase {
 
-    @OneToOne()
-    @JoinColumn(name = "id_usuario")
-    private Usuario usuario;
+    @OneToOne(cascade = CascadeType.ALL)
+    @MapsId
+    @JoinColumn(name = "id_pessoa")
+    private Pessoa pessoa;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_endereco")

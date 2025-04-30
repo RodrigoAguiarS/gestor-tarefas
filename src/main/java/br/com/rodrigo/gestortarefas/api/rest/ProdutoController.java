@@ -1,6 +1,8 @@
 package br.com.rodrigo.gestortarefas.api.rest;
 
 import br.com.rodrigo.gestortarefas.api.model.form.ProdutoForm;
+import br.com.rodrigo.gestortarefas.api.model.response.GraficoProduto;
+import br.com.rodrigo.gestortarefas.api.model.response.GraficoVenda;
 import br.com.rodrigo.gestortarefas.api.model.response.ProdutoResponse;
 import br.com.rodrigo.gestortarefas.api.services.IProduto;
 import jakarta.validation.Valid;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -30,13 +33,13 @@ public class ProdutoController extends ControllerBase<ProdutoResponse> {
 
     @PostMapping
     public ResponseEntity<ProdutoResponse> criar(@RequestBody @Valid ProdutoForm produtoForm,  UriComponentsBuilder uriBuilder) {
-        ProdutoResponse response = produtoService.criar(produtoForm);
+        ProdutoResponse response = produtoService.criar( null, produtoForm);
         return responderItemCriadoComURI(response, uriBuilder, "/tarefas/{id}", response.getId().toString());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProdutoResponse> atualizar(@PathVariable Long id, @RequestBody @Valid ProdutoForm produtoForm) {
-        ProdutoResponse response = produtoService.atualizar(id, produtoForm);
+        ProdutoResponse response = produtoService.criar(id, produtoForm);
         return responderSucessoComItem(response);
     }
 
@@ -66,5 +69,23 @@ public class ProdutoController extends ControllerBase<ProdutoResponse> {
                                                             @RequestParam(required = false) Long categoriaId) {
         Page<ProdutoResponse> produtos = produtoService.listarTodos(page, size, sort, id, nome, descricao, preco, codigoBarras, quantidade, categoriaId);
         return responderListaDeItensPaginada(produtos);
+    }
+
+    @GetMapping("/grafico")
+    public ResponseEntity<List<GraficoVenda>> obterVendasParaGrafico() {
+        List<GraficoVenda> vendasParaGrafico = produtoService.obterVendasParaGrafico();
+        return ResponseEntity.ok(vendasParaGrafico);
+    }
+
+    @GetMapping("/grafico/categorias")
+    public ResponseEntity<List<GraficoVenda>> obterVendasPorCategoria() {
+        List<GraficoVenda> vendasParaGrafico = produtoService.obterVendasPorCategoria();
+        return ResponseEntity.ok(vendasParaGrafico);
+    }
+
+    @GetMapping("/grafico/futuramento")
+    public ResponseEntity<List<GraficoProduto>> obterFaturamentoPorProduto() {
+        List<GraficoProduto> vendasParaGrafico = produtoService.obterFaturamentoPorProduto();
+        return ResponseEntity.ok(vendasParaGrafico);
     }
 }

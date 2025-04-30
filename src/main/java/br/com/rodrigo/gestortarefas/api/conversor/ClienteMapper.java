@@ -12,11 +12,11 @@ public class ClienteMapper {
     public static ClienteResponse entidadeParaResponse(Cliente cliente) {
         return new ClienteResponse(
                 cliente.getId(),
-                cliente.getUsuario().getEmail(),
-                cliente.getUsuario().getPessoa().getNome(),
-                cliente.getUsuario().getPessoa().getTelefone(),
-                cliente.getUsuario().getPessoa().getCpf(),
-                cliente.getUsuario().getPessoa().getDataNascimento(),
+                cliente.getPessoa().getUsuario().getEmail(),
+                cliente.getPessoa().getNome(),
+                cliente.getPessoa().getTelefone(),
+                cliente.getPessoa().getCpf(),
+                cliente.getPessoa().getDataNascimento(),
                 cliente.getEndereco().getRua(),
                 cliente.getEndereco().getNumero(),
                 cliente.getEndereco().getBairro(),
@@ -26,9 +26,9 @@ public class ClienteMapper {
         );
     }
 
-    public static Cliente formParaEntidade(ClienteForm form, Usuario usuario) {
+    public static Cliente formParaEntidade(ClienteForm form, Pessoa pessoa) {
         return Cliente.builder()
-                .usuario(usuario)
+                .pessoa(pessoa)
                 .endereco(Endereco.builder()
                         .rua(form.getRua())
                         .numero(form.getNumero())
@@ -43,13 +43,13 @@ public class ClienteMapper {
     public static Cliente responseParaEntidade(ClienteResponse response) {
         Cliente cliente = new Cliente();
         cliente.setId(response.getId());
-        cliente.setUsuario(new Usuario());
-        cliente.getUsuario().setEmail(response.getEmail());
-        cliente.getUsuario().setPessoa(new Pessoa());
-        cliente.getUsuario().getPessoa().setNome(response.getNome());
-        cliente.getUsuario().getPessoa().setTelefone(response.getTelefone());
-        cliente.getUsuario().getPessoa().setCpf(response.getCpf());
-        cliente.getUsuario().getPessoa().setDataNascimento(response.getDataNascimento());
+        cliente.setPessoa(new Pessoa());
+        cliente.getPessoa().setUsuario(new Usuario());
+        cliente.getPessoa().getUsuario().setEmail(response.getEmail());
+        cliente.getPessoa().setNome(response.getNome());
+        cliente.getPessoa().setTelefone(response.getTelefone());
+        cliente.getPessoa().setCpf(response.getCpf());
+        cliente.getPessoa().setDataNascimento(response.getDataNascimento());
         cliente.setEndereco(new Endereco());
         cliente.getEndereco().setRua(response.getRua());
         cliente.getEndereco().setNumero(response.getNumero());

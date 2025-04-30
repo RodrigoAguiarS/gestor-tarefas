@@ -7,11 +7,11 @@ import org.springframework.data.domain.Page;
 import java.util.Optional;
 
 public interface ICliente {
-    ClienteResponse criar(ClienteForm clienteForm);
-    ClienteResponse atualizar(Long id, ClienteForm clienteForm);
+    ClienteResponse criar(Long idCliente, ClienteForm clienteForm);
     void deletar(Long id);
-    Optional<ClienteResponse> consultarPorId(Long id);
-    Optional<ClienteResponse> getClienteLogado();
+    Optional<ClienteResponse> consultarPorId(Long idCliente);
     Page<ClienteResponse> buscar(int page, int size, String sort, String email,
                                  String nome, String cpf, String cidade, String estado, String cep);
+
+    Optional<ClienteResponse> getClienteLogado();
 }

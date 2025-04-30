@@ -1,12 +1,12 @@
 package br.com.rodrigo.gestortarefas.api.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
@@ -49,9 +49,13 @@ public class Usuario extends EntidadeBase implements UserDetails {
     )
     private Set<Perfil> perfis = new HashSet<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "id_pessoa")
-    private Pessoa pessoa = new Pessoa();
+    private Pessoa pessoa;
+
+    @ManyToOne
+    @JoinColumn(name = "id_empresa", nullable = false)
+    private Empresa empresa;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

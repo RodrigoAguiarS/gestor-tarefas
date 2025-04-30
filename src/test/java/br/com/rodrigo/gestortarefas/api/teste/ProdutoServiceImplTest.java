@@ -27,9 +27,20 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProdutoServiceImplTest {
@@ -89,7 +100,7 @@ class ProdutoServiceImplTest {
         when(produtoRepository.save(any(Produto.class))).thenReturn(produto);
         doNothing().when(validadorUtil).validarCodigoBarras(anyString(), any());
 
-        ProdutoResponse resultado = produtoService.criar(produtoForm);
+        ProdutoResponse resultado = produtoService.criar(null, produtoForm);
 
         assertNotNull(resultado);
         assertEquals(produto.getId(), resultado.getId());
@@ -105,7 +116,7 @@ class ProdutoServiceImplTest {
                 .when(validadorUtil).validarCodigoBarras(anyString(), any());
 
         assertThrows(ViolacaoIntegridadeDadosException.class,
-                () -> produtoService.criar(produtoForm));
+                () -> produtoService.criar(null, produtoForm));
         verify(produtoRepository, never()).save(any());
     }
 
@@ -117,7 +128,7 @@ class ProdutoServiceImplTest {
         when(produtoRepository.save(any(Produto.class))).thenReturn(produto);
         doNothing().when(validadorUtil).validarCodigoBarras(anyString(), any());
 
-        ProdutoResponse resultado = produtoService.atualizar(id, produtoForm);
+        ProdutoResponse resultado = produtoService.criar(id, produtoForm);
 
         assertNotNull(resultado);
         assertEquals(produto.getId(), resultado.getId());

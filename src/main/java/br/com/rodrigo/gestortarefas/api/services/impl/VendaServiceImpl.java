@@ -7,25 +7,33 @@ import br.com.rodrigo.gestortarefas.api.conversor.StatusMapper;
 import br.com.rodrigo.gestortarefas.api.conversor.VendaMapper;
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
+import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
+import br.com.rodrigo.gestortarefas.api.model.AcaoMovimentacao;
+import br.com.rodrigo.gestortarefas.api.model.EstoqueService;
 import br.com.rodrigo.gestortarefas.api.model.HistoricoStatusVenda;
 import br.com.rodrigo.gestortarefas.api.model.ItemVenda;
+import br.com.rodrigo.gestortarefas.api.model.OrigemMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.Perfil;
 import br.com.rodrigo.gestortarefas.api.model.Produto;
 import br.com.rodrigo.gestortarefas.api.model.Status;
+import br.com.rodrigo.gestortarefas.api.model.TipoMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.TipoVenda;
 import br.com.rodrigo.gestortarefas.api.model.Venda;
 import br.com.rodrigo.gestortarefas.api.model.form.VendaForm;
 import br.com.rodrigo.gestortarefas.api.model.response.ClienteResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.PagamentoResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.StatusResponse;
+import br.com.rodrigo.gestortarefas.api.model.response.UsuarioResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.VendaResponse;
 import br.com.rodrigo.gestortarefas.api.repository.HistoricoStatusVendaRepository;
 import br.com.rodrigo.gestortarefas.api.repository.VendaRepository;
+import br.com.rodrigo.gestortarefas.api.services.HorarioFuncionamentoService;
 import br.com.rodrigo.gestortarefas.api.services.ICliente;
 import br.com.rodrigo.gestortarefas.api.services.IItemPedido;
 import br.com.rodrigo.gestortarefas.api.services.IPagamento;
 import br.com.rodrigo.gestortarefas.api.services.IProduto;
 import br.com.rodrigo.gestortarefas.api.services.IStatus;
+import br.com.rodrigo.gestortarefas.api.services.IUsuario;
 import br.com.rodrigo.gestortarefas.api.services.IVenda;
 import br.com.rodrigo.gestortarefas.api.services.SseService;
 import br.com.rodrigo.gestortarefas.api.util.MensagemUtil;
@@ -38,6 +46,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -49,17 +58,25 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
 
     private final VendaRepository vendaRepository;
     private final HistoricoStatusVendaRepository historicoStatusVendaRepository;
+    private final IUsuario usuarioService;
     private final ICliente clienteService;
     private final IPagamento pagamentoService;
     private final IStatus statusService;
     private final IProduto produtoService;
     private final SseService sseService;
+    private final EstoqueService estoqueService;
+    private final HorarioFuncionamentoService horarioFuncionamentoService;
 
     @Override
     @Transactional
     public VendaResponse criar(VendaForm vendaForm, Long id) {
+        if (!horarioFuncionamentoService.estaAbertoAgora()) {
+            throw new ViolacaoIntegridadeDadosException(
+                    MensagensError.HORARIO_FUNCIONAMENTO_FECHADO.getMessage());
+        }
         Venda venda = criaVenda(vendaForm, id);
         venda = vendaRepository.save(venda);
+        processarMovimentacaoEstoque(venda, id);
         salvarHistoricoStatus(venda, venda.getStatus(), venda.getStatus().getDescricao());
         String mensagemVendaCriada = MensagemUtil.criarMensagemVendaRealizada(venda);
         sseService.notificarPorPerfil(mensagemVendaCriada, Perfil.ADMINSTRADOR);
@@ -75,9 +92,8 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
 
     @Override
     public Page<VendaResponse> listarPedidosCliente(int page, int size, String sort) {
-        ClienteResponse cliente = clienteService.getClienteLogado()
-                .orElseThrow(() -> new ObjetoNaoEncontradoException(
-                        MensagensError.CLIENTE_NAO_AUTORIZADO.getMessage()));
+
+        UsuarioResponse usuario = usuarioService.obterUsuarioLogado();
 
         String[] sortParams = sort.split(",");
         Sort.Direction direction = sortParams.length > 1 ?
@@ -85,7 +101,8 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
 
-        Page<Venda> vendas = vendaRepository.findByClienteIdOrderByDataVendaDesc(cliente.getId(), pageable);
+        Page<Venda> vendas = vendaRepository.findByClienteIdOrderByDataVendaDesc(
+                usuario.getPessoa().getId(), pageable);
 
         return vendas.map(VendaMapper::entidadeParaResponse);
     }
@@ -156,6 +173,11 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
             item.calcularValorTotal();
             valorTotal = valorTotal.add(item.getValorTotal());
         }
+
+        BigDecimal porcentagemPagamento = venda.getPagamento().getPorcentagemAcrescimo();
+        BigDecimal fatorPorcentagem = BigDecimal.ONE.add(
+                porcentagemPagamento.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP ));
+        valorTotal = valorTotal.multiply(fatorPorcentagem);
         venda.setValorTotal(valorTotal);
     }
 
@@ -176,7 +198,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
         salvarHistoricoStatus(venda, novoStatus, novoStatus.getDescricao());
 
         String mensagem = MensagemUtil.criarMensagemMudancaStatusVenda(venda, novoStatus.getDescricao());
-        sseService.notificarUsuario(venda.getCliente().getUsuario().getId(), mensagem);
+        sseService.notificarUsuario(venda.getCliente().getPessoa().getUsuario().getId(), mensagem);
 
         return VendaMapper.entidadeParaResponse(venda);
     }
@@ -187,5 +209,14 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
         historico.setStatus(novoStatus);
         historico.setObservacao(observacao);
         historicoStatusVendaRepository.save(historico);
+    }
+
+    private void processarMovimentacaoEstoque(Venda venda, Long id) {
+        AcaoMovimentacao acao = (id == null) ? AcaoMovimentacao.NOVA_VENDA : AcaoMovimentacao.ATUALIZACAO_VENDA;
+
+        for (ItemVenda item : venda.getItens()) {
+            estoqueService.processarMovimentacao(item, TipoMovimentacao.SAIDA,
+                    OrigemMovimentacao.VENDA, acao, venda.getId());
+        }
     }
 }
