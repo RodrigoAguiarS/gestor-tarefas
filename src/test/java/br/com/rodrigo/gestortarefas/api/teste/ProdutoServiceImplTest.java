@@ -2,14 +2,18 @@ package br.com.rodrigo.gestortarefas.api.teste;
 
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
+import br.com.rodrigo.gestortarefas.api.model.AcaoMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.Categoria;
+import br.com.rodrigo.gestortarefas.api.model.OrigemMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.Produto;
+import br.com.rodrigo.gestortarefas.api.model.TipoMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.form.ProdutoForm;
 import br.com.rodrigo.gestortarefas.api.model.response.CategoriaResponse;
 import br.com.rodrigo.gestortarefas.api.model.response.ProdutoResponse;
 import br.com.rodrigo.gestortarefas.api.repository.ProdutoRepository;
 import br.com.rodrigo.gestortarefas.api.services.ICategoria;
 import br.com.rodrigo.gestortarefas.api.services.S3StorageService;
+import br.com.rodrigo.gestortarefas.api.services.estoque.EstoqueService;
 import br.com.rodrigo.gestortarefas.api.services.impl.ProdutoServiceImpl;
 import br.com.rodrigo.gestortarefas.api.util.ValidadorUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -56,6 +61,9 @@ class ProdutoServiceImplTest {
 
     @Mock
     private S3StorageService s3StorageService;
+
+    @Mock
+    private EstoqueService estoqueService;
 
     @InjectMocks
     private ProdutoServiceImpl produtoService;
@@ -99,6 +107,9 @@ class ProdutoServiceImplTest {
         when(categoriaService.consultarPorId(any())).thenReturn(Optional.of(categoriaResponse));
         when(produtoRepository.save(any(Produto.class))).thenReturn(produto);
         doNothing().when(validadorUtil).validarCodigoBarras(anyString(), any());
+        doNothing().when(estoqueService).processarMovimentacao(
+                any(Produto.class), anyInt(), any(TipoMovimentacao.class),
+                any(OrigemMovimentacao.class), any(AcaoMovimentacao.class), any());
 
         ProdutoResponse resultado = produtoService.criar(null, produtoForm);
 
@@ -108,6 +119,9 @@ class ProdutoServiceImplTest {
         assertEquals(produto.getCodigoBarras(), resultado.getCodigoBarras());
         verify(produtoRepository, times(1)).save(any(Produto.class));
         verify(validadorUtil, times(1)).validarCodigoBarras(produtoForm.getCodigoBarras(), null);
+        verify(estoqueService, times(1)).processarMovimentacao(
+                any(Produto.class), anyInt(), any(TipoMovimentacao.class),
+                any(OrigemMovimentacao.class), any(AcaoMovimentacao.class), any());
     }
 
     @Test
@@ -127,6 +141,9 @@ class ProdutoServiceImplTest {
         when(produtoRepository.findById(id)).thenReturn(Optional.of(produto));
         when(produtoRepository.save(any(Produto.class))).thenReturn(produto);
         doNothing().when(validadorUtil).validarCodigoBarras(anyString(), any());
+        doNothing().when(estoqueService).processarMovimentacao(
+                any(Produto.class), anyInt(), any(TipoMovimentacao.class),
+                any(OrigemMovimentacao.class), any(AcaoMovimentacao.class), any());
 
         ProdutoResponse resultado = produtoService.criar(id, produtoForm);
 
@@ -136,6 +153,9 @@ class ProdutoServiceImplTest {
         assertEquals(produto.getCodigoBarras(), resultado.getCodigoBarras());
         verify(produtoRepository, times(1)).save(any(Produto.class));
         verify(validadorUtil, times(1)).validarCodigoBarras(produtoForm.getCodigoBarras(), id);
+        verify(estoqueService, times(1)).processarMovimentacao(
+                any(Produto.class), anyInt(), any(TipoMovimentacao.class),
+                any(OrigemMovimentacao.class), any(AcaoMovimentacao.class), any());
     }
 
     @Test

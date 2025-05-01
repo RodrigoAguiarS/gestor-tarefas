@@ -6,7 +6,6 @@ import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.model.AcaoMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.Categoria;
-import br.com.rodrigo.gestortarefas.api.model.EstoqueService;
 import br.com.rodrigo.gestortarefas.api.model.OrigemMovimentacao;
 import br.com.rodrigo.gestortarefas.api.model.Produto;
 import br.com.rodrigo.gestortarefas.api.model.Status;
@@ -20,6 +19,7 @@ import br.com.rodrigo.gestortarefas.api.repository.ProdutoRepository;
 import br.com.rodrigo.gestortarefas.api.services.ICategoria;
 import br.com.rodrigo.gestortarefas.api.services.IProduto;
 import br.com.rodrigo.gestortarefas.api.services.S3StorageService;
+import br.com.rodrigo.gestortarefas.api.services.estoque.EstoqueService;
 import br.com.rodrigo.gestortarefas.api.util.ValidadorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -47,8 +47,8 @@ public class ProdutoServiceImpl implements IProduto {
     @Override
     public ProdutoResponse criar(Long id, ProdutoForm produtoForm) {
         Produto produto = criaProduto(produtoForm, id);
-        produto = produtoRepository.save(produto);
         movimentarEstoqueProduto(produto, produtoForm.getQuantidade(), id);
+        produto = produtoRepository.save(produto);
         return construirDto(produto);
     }
 
@@ -144,6 +144,6 @@ public class ProdutoServiceImpl implements IProduto {
         OrigemMovimentacao origem = OrigemMovimentacao.PRODUTO;
         AcaoMovimentacao acao = (idProduto == null) ? AcaoMovimentacao.CRIACAO_PRODUTO : AcaoMovimentacao.EDICAO_PRODUTO;
 
-        estoqueService.processarMovimentacaoProduto(produto, quantidade, tipo, origem, acao, produto.getId());
+        estoqueService.processarMovimentacao(produto, quantidade, tipo, origem, acao, produto.getId());
     }
 }

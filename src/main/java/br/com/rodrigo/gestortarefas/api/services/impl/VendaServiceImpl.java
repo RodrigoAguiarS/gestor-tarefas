@@ -9,7 +9,6 @@ import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.exception.ViolacaoIntegridadeDadosException;
 import br.com.rodrigo.gestortarefas.api.model.AcaoMovimentacao;
-import br.com.rodrigo.gestortarefas.api.model.EstoqueService;
 import br.com.rodrigo.gestortarefas.api.model.HistoricoStatusVenda;
 import br.com.rodrigo.gestortarefas.api.model.ItemVenda;
 import br.com.rodrigo.gestortarefas.api.model.OrigemMovimentacao;
@@ -36,6 +35,7 @@ import br.com.rodrigo.gestortarefas.api.services.IStatus;
 import br.com.rodrigo.gestortarefas.api.services.IUsuario;
 import br.com.rodrigo.gestortarefas.api.services.IVenda;
 import br.com.rodrigo.gestortarefas.api.services.SseService;
+import br.com.rodrigo.gestortarefas.api.services.estoque.EstoqueService;
 import br.com.rodrigo.gestortarefas.api.util.MensagemUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -215,7 +215,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
         AcaoMovimentacao acao = (id == null) ? AcaoMovimentacao.NOVA_VENDA : AcaoMovimentacao.ATUALIZACAO_VENDA;
 
         for (ItemVenda item : venda.getItens()) {
-            estoqueService.processarMovimentacao(item, TipoMovimentacao.SAIDA,
+            estoqueService.processarMovimentacao(item, item.getQuantidade(), TipoMovimentacao.SAIDA,
                     OrigemMovimentacao.VENDA, acao, venda.getId());
         }
     }
