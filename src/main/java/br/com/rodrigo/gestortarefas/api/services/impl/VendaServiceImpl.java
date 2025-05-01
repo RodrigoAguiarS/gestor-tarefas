@@ -29,6 +29,7 @@ import br.com.rodrigo.gestortarefas.api.repository.VendaRepository;
 import br.com.rodrigo.gestortarefas.api.services.HorarioFuncionamentoService;
 import br.com.rodrigo.gestortarefas.api.services.ICliente;
 import br.com.rodrigo.gestortarefas.api.services.IItemPedido;
+import br.com.rodrigo.gestortarefas.api.services.INotificacao;
 import br.com.rodrigo.gestortarefas.api.services.IPagamento;
 import br.com.rodrigo.gestortarefas.api.services.IProduto;
 import br.com.rodrigo.gestortarefas.api.services.IRegistroEntrada;
@@ -66,6 +67,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
     private final IProduto produtoService;
     private final SseService sseService;
     private final EstoqueService estoqueService;
+    private final INotificacao notificacaoService;
     private final HorarioFuncionamentoService horarioFuncionamentoService;
     private final IRegistroEntrada registroEntradaService;
 
@@ -84,6 +86,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
         salvarHistoricoStatus(venda, venda.getStatus(), venda.getStatus().getDescricao());
         String mensagemVendaCriada = MensagemUtil.criarMensagemVendaRealizada(venda);
         sseService.notificarPorPerfil(mensagemVendaCriada, Perfil.ADMINSTRADOR);
+        notificacaoService.criarNotificacao(venda.getCliente().getPessoa().getUsuario(), mensagemVendaCriada);
 
         return VendaMapper.entidadeParaResponse(venda);
     }
@@ -206,6 +209,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
         salvarHistoricoStatus(venda, novoStatus, novoStatus.getDescricao());
 
         String mensagem = MensagemUtil.criarMensagemMudancaStatusVenda(venda, novoStatus.getDescricao());
+        notificacaoService.criarNotificacao(venda.getCliente().getPessoa().getUsuario(), mensagem);
         sseService.notificarUsuario(venda.getCliente().getPessoa().getUsuario().getId(), mensagem);
 
         return VendaMapper.entidadeParaResponse(venda);

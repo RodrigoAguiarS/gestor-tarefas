@@ -21,6 +21,7 @@ public class SseService {
     private final Map<Long, SseEmitter> emissores = new ConcurrentHashMap<>();
     private final Map<Long, List<String>> mensagensPendentes = new ConcurrentHashMap<>();
     private final UsuarioRepository usuarioRepository;
+    private final INotificacao notificacaoService;
 
     public SseEmitter conectar(Long usuarioId) {
         SseEmitter emitterExistente = emissores.get(usuarioId);
@@ -71,9 +72,10 @@ public class SseService {
 
     public void notificarPorPerfil(String mensagem, long idPerfil) {
         List<Usuario> operadores = usuarioRepository.findAllByPerfisId(idPerfil);
-        operadores.forEach(operador ->
-                notificarUsuario(operador.getId(), mensagem)
-        );
+        operadores.forEach(operador -> {
+            notificarUsuario(operador.getId(), mensagem);
+            notificacaoService.criarNotificacao(operador, mensagem);
+        });
     }
 
     private void enviarMensagensPendentes(Long usuarioId) {
