@@ -27,8 +27,8 @@ public class MovimentacaoEstoque extends EntidadeBase {
     @Column(nullable = false)
     private int quantidade;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "produto_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_produto", nullable = false)
     private Produto produto;
 
     private Integer quantidadeAnterior;
