@@ -86,7 +86,6 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
         salvarHistoricoStatus(venda, venda.getStatus(), venda.getStatus().getDescricao());
         String mensagemVendaCriada = MensagemUtil.criarMensagemVendaRealizada(venda);
         sseService.notificarPorPerfil(mensagemVendaCriada, Perfil.ADMINSTRADOR);
-        notificacaoService.criarNotificacao(venda.getCliente().getPessoa().getUsuario(), mensagemVendaCriada);
 
         return VendaMapper.entidadeParaResponse(venda);
     }
