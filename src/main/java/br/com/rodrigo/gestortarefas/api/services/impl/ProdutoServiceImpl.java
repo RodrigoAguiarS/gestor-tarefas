@@ -63,8 +63,8 @@ public class ProdutoServiceImpl implements IProduto {
                 s3StorageService.apagarArquivo(fileUrl);
             }
         }
-
-        produtoRepository.delete(produto);
+        produto.desativar();
+        produtoRepository.save(produto);
     }
 
     @Override

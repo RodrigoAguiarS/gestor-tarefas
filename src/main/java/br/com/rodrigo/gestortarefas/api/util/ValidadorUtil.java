@@ -46,12 +46,12 @@ public class ValidadorUtil {
 
     public void validarCodigoBarras(String codigo, Long idProduto) {
         if (idProduto == null) {
-            if (produtoRepository.existsByCodigoBarras(codigo)) {
+            if (produtoRepository.existsByCodigoBarrasAndAtivo(codigo, true)) {
                 throw new ViolacaoIntegridadeDadosException(
                         MensagensError.CODIGO_BARRAS_DUPLICADO.getMessage(codigo));
             }
         } else {
-            if (produtoRepository.existsByCodigoBarrasAndIdNot(codigo, idProduto)) {
+            if (produtoRepository.existsByCodigoBarrasAndIdNotAndAtivo(codigo, idProduto, true)) {
                 throw new ViolacaoIntegridadeDadosException(
                         MensagensError.CODIGO_BARRAS_DUPLICADO.getMessage(codigo));
             }

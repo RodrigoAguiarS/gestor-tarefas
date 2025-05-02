@@ -15,25 +15,33 @@ public class DateConverterUtil {
             DateTimeFormatter.ofPattern("yyyy-MM-dd")
     );
 
-    public static LocalDateTime parse(String dateString) {
+    public static LocalDateTime parse(String dateString, boolean inicioDoDia) {
         if (dateString == null || dateString.trim().isEmpty()) {
             return null;
         }
 
         for (DateTimeFormatter formatter : FORMATTERS) {
             try {
-                // Tenta parsear como LocalDateTime primeiro
-                return LocalDateTime.parse(dateString, formatter);
+                LocalDateTime dateTime = LocalDateTime.parse(dateString, formatter);
+                return ajustarHorario(dateTime, inicioDoDia);
             } catch (DateTimeParseException e) {
                 try {
-
                     LocalDate date = LocalDate.parse(dateString, formatter);
-                    return date.atStartOfDay();
+                    LocalDateTime dateTime = date.atStartOfDay();
+                    return ajustarHorario(dateTime, inicioDoDia);
                 } catch (DateTimeParseException ignored) {
                 }
             }
         }
 
         throw new DateTimeParseException("Não foi possível parsear a data: " + dateString, dateString, 0);
+    }
+
+    private static LocalDateTime ajustarHorario(LocalDateTime dateTime, boolean inicioDoDia) {
+        if (inicioDoDia) {
+            return dateTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        } else {
+            return dateTime.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        }
     }
 }

@@ -63,8 +63,8 @@ public class VendaController extends ControllerBase<VendaResponse> {
             @RequestParam(required = false) String dataInicio,
             @RequestParam(required = false) String dataFim) {
 
-        LocalDateTime inicio = DateConverterUtil.parse(dataInicio);
-        LocalDateTime fim = DateConverterUtil.parse(dataFim);
+        LocalDateTime inicio = DateConverterUtil.parse(dataInicio, true);
+        LocalDateTime fim = DateConverterUtil.parse(dataFim, false);
 
         return responderListaDeItensPaginada(
                 vendaService.listarTodos(page, size, sort, id, nomeCliente, status,

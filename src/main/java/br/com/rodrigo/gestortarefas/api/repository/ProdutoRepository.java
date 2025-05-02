@@ -19,10 +19,10 @@ import java.util.List;
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     @Cacheable("produtos")
-    Boolean existsByCodigoBarras(String codigoBarras);
+    Boolean existsByCodigoBarrasAndAtivo(String codigoBarras, boolean ativo);
 
     @Cacheable("produtos")
-    Boolean existsByCodigoBarrasAndIdNot(String codigoBarras, Long id);
+    Boolean existsByCodigoBarrasAndIdNotAndAtivo(String codigoBarras, Long id, boolean ativo);
 
     @Cacheable("produtos")
     boolean existsByCategoriaId(Long id);
@@ -31,6 +31,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     @Query("SELECT p FROM Produto p " +
             "JOIN p.categoria c " +
             "WHERE (:id IS NULL OR p.id = :id) " +
+            "AND p.ativo = true " +
             "AND (:nome IS NULL OR LOWER(p.nome) LIKE %:nome%) " +
             "AND (:descricao IS NULL OR LOWER(p.descricao) LIKE %:descricao%) " +
             "AND (:preco IS NULL OR p.preco = :preco) " +
