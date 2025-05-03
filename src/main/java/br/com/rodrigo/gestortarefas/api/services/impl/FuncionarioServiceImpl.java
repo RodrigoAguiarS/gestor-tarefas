@@ -1,5 +1,6 @@
 package br.com.rodrigo.gestortarefas.api.services.impl;
 
+import br.com.rodrigo.gestortarefas.api.conversor.UsuarioMapper;
 import br.com.rodrigo.gestortarefas.api.exception.MensagensError;
 import br.com.rodrigo.gestortarefas.api.exception.ObjetoNaoEncontradoException;
 import br.com.rodrigo.gestortarefas.api.model.Empresa;
@@ -125,24 +126,18 @@ public class FuncionarioServiceImpl implements IFuncionario {
     private FuncionarioResponse construirDto(Funcionario funcionario) {
         return FuncionarioResponse.builder()
                 .id(funcionario.getId())
-                .nome(funcionario.getPessoa().getNome())
-                .cpf(funcionario.getPessoa().getCpf())
-                .dataNascimento(funcionario.getPessoa().getDataNascimento())
-                .telefone(funcionario.getPessoa().getTelefone())
-                .email(funcionario.getPessoa().getUsuario().getEmail())
-                .perfis(funcionario.getPessoa() != null && funcionario.getPessoa().getUsuario() != null
-                        ? funcionario.getPessoa().getUsuario().getPerfis().stream()
+                .usuario(UsuarioMapper.entidadeParaResponse(funcionario.getPessoa().getUsuario()))
+                .cargo(funcionario.getCargo())
+                .matricula(funcionario.getMatricula())
+                .salario(funcionario.getSalario())
+                .perfis(funcionario.getPessoa().getUsuario().getPerfis().stream()
                         .map(perfil -> PerfilResponse.builder()
                                 .id(perfil.getId())
                                 .nome(perfil.getNome())
                                 .descricao(perfil.getDescricao())
                                 .ativo(perfil.getAtivo())
                                 .build())
-                        .collect(Collectors.toSet())
-                        : null)
-                .cargo(funcionario.getCargo())
-                .matricula(funcionario.getMatricula())
-                .salario(funcionario.getSalario())
+                        .collect(Collectors.toSet()))
                 .build();
     }
 }
