@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 @Getter
@@ -16,11 +15,7 @@ import java.util.Set;
 @Builder
 public class FuncionarioResponse {
     private Long id;
-    private String nome;
-    private String cpf;
-    private LocalDate dataNascimento;
-    private String telefone;
-    private String email;
+    private UsuarioResponse usuario;
     private String cargo;
     private String matricula;
     private Double salario;

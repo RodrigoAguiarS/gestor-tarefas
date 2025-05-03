@@ -182,7 +182,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
 
         BigDecimal porcentagemPagamento = venda.getPagamento().getPorcentagemAcrescimo();
         BigDecimal fatorPorcentagem = BigDecimal.ONE.add(
-                porcentagemPagamento.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP ));
+                porcentagemPagamento.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP));
         valorTotal = valorTotal.multiply(fatorPorcentagem);
         venda.setValorTotal(valorTotal);
     }

@@ -96,7 +96,7 @@ class VendaServiceImplTest {
         assertNotNull(resultado);
         assertEquals(2, resultado.getTotalElements());
         assertTrue(resultado.getContent().stream()
-                .anyMatch(v -> v.getCliente().getNome().equals("João Silva")));
+                .anyMatch(v -> v.getCliente().getUsuario().getPessoa().getNome().equals("João Silva")));
         assertTrue(resultado.getContent().stream()
                 .anyMatch(v -> true));
     }
@@ -128,7 +128,7 @@ class VendaServiceImplTest {
         assertNotNull(resultado);
         assertEquals(2, resultado.getTotalElements());
         assertTrue(resultado.getContent().stream()
-                .anyMatch(v -> v.getCliente().getNome().equals("João Silva")));
+                .anyMatch(v -> v.getCliente().getUsuario().getPessoa().getNome().equals("João Silva")));
         assertTrue(resultado.getContent().stream()
                 .anyMatch(v -> true));
     }
