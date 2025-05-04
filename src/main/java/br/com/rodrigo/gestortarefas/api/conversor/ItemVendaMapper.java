@@ -21,6 +21,7 @@ public class ItemVendaMapper {
         item.setVenda(venda);
         item.setProduto(produto);
         item.setQuantidade(form.getQuantidade());
+        item.setObservacao(form.getObservacao());
         item.setPreco(produto.getPreco());
         item.calcularValorTotal();
         return item;
@@ -50,6 +51,7 @@ public class ItemVendaMapper {
         return new ItemVendaResponse(
                 item.getProduto().getDescricao(),
                 ProdutoMapper.entidadeParaResponse(item.getProduto()),
+                item.getObservacao(),
                 item.getQuantidade(),
                 item.getValorTotal(),
                 item.getPreco()

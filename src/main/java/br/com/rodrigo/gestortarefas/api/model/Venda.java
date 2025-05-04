@@ -49,6 +49,9 @@ public class Venda extends EntidadeBase {
     @JoinColumn(name = "id_status")
     private Status status;
 
+    @Column(name = "observacao", length = 500)
+    private String observacao;
+
     @ManyToOne
     @JoinColumn(name = "id_pagamento")
     private Pagamento pagamento;

@@ -44,6 +44,9 @@ public class Produto extends EntidadeBase {
     @Column(name = "quantidade")
     private Integer quantidade;
 
+    @Column(name = "quantidade_minima")
+    private Integer quantidadeMinima;
+
     @ManyToOne
     @JoinColumn(name = "id_categoria")
     private Categoria categoria;

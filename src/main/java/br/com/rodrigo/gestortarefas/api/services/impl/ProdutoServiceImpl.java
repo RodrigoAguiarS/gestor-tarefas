@@ -114,6 +114,7 @@ public class ProdutoServiceImpl implements IProduto {
         produto.setPreco(produtoForm.getPreco());
         produto.setCodigoBarras(produtoForm.getCodigoBarras());
         produto.setQuantidade(produtoForm.getQuantidade());
+        produto.setQuantidadeMinima(produtoForm.getQuantidadeMinima());
         produto.setCategoria(categoria);
         produto.setArquivosUrl(produtoForm.getArquivosUrl());
 

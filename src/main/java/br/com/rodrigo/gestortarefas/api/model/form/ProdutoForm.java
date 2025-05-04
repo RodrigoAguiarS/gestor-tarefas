@@ -36,6 +36,9 @@ public class ProdutoForm {
     @NotNull
     private Integer quantidade;
 
+    @NotNull
+    private Integer quantidadeMinima;
+
     private List<String> arquivosUrl;
 
     @NotNull
