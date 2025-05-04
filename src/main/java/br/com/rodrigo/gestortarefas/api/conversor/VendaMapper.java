@@ -18,6 +18,7 @@ public class VendaMapper {
         VendaResponse response = new VendaResponse();
         response.setId(venda.getId());
         response.setTipoVenda(venda.getTipoVenda().name());
+        response.setObservacao(venda.getObservacao());
         response.setCliente(ClienteMapper.entidadeParaResponse(venda.getCliente()));
         response.setDataVenda(venda.getDataVenda());
         response.setPagamento(PagamentoMapper.entidadeParaResponse(venda.getPagamento()));
@@ -32,6 +33,7 @@ public class VendaMapper {
                 .map(item -> new ItemVendaResponse(
                         item.getProduto().getDescricao(),
                         ProdutoMapper.entidadeParaResponse(item.getProduto()),
+                        item.getObservacao(),
                         item.getQuantidade(),
                         item.getPreco(),
                         item.getValorTotal()

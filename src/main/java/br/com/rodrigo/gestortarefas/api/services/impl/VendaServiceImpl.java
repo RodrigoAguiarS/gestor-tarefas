@@ -158,6 +158,7 @@ public class VendaServiceImpl implements IVenda, IItemPedido {
         venda.setCliente(ClienteMapper.responseParaEntidade(clienteResponse));
         venda.setPagamento(PagamentoMapper.responseParaEntidade(pagamentoResponse));
         venda.setStatus(StatusMapper.responseParaEntidade(statusResponse));
+        venda.setObservacao(vendaForm.getObservacao());
         venda.setTipoVenda(TipoVenda.valueOf(vendaForm.getTipoVenda()));
         venda.setDataVenda(LocalDateTime.now());
 

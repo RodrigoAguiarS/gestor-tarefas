@@ -15,6 +15,8 @@ public class ItemVendaForm {
     @NotNull
     private ProdutoForm produto;
 
+    private String observacao;
+
     @NotNull
     @Min(1)
     private Integer quantidade;

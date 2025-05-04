@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 public class ItemVendaResponse {
     private String descricao;
     private ProdutoResponse produto;
+    private String observacao;
     private Integer quantidade;
     private BigDecimal precoUnitario;
     private BigDecimal valorTotal;

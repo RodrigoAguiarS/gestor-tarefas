@@ -19,6 +19,7 @@ public class ProdutoResponse {
     private String descricao;
     private String codigoBarras;
     private Integer quantidade;
+    private Integer quantidadeMinima;
     private BigDecimal preco;
     private CategoriaResponse categoria;
     private List<String> arquivosUrl;

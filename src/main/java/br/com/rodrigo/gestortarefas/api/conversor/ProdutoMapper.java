@@ -15,6 +15,7 @@ public class ProdutoMapper {
                 produto.getDescricao(),
                 produto.getCodigoBarras(),
                 produto.getQuantidade(),
+                produto.getQuantidadeMinima(),
                 produto.getPreco(),
                 new CategoriaResponse(
                         produto.getCategoria().getId(),
@@ -30,6 +31,7 @@ public class ProdutoMapper {
                 .descricao(form.getDescricao())
                 .codigoBarras(form.getCodigoBarras())
                 .quantidade(form.getQuantidade())
+                .quantidadeMinima(form.getQuantidadeMinima())
                 .preco(form.getPreco())
                 .categoria(categoria)
                 .arquivosUrl(form.getArquivosUrl())

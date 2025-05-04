@@ -93,6 +93,9 @@ public class CupomFiscalController {
         }
 
         document.add(new Paragraph("-----------VALORES------------", font));
+        if(response.getObservacao() != null) {
+            document.add(new Paragraph(response.getObservacao(), font));
+        }
         document.add(new Paragraph("Pagamento: " + response.getPagamento().getNome(), font));
         document.add(new Paragraph("Subtotal: R$ " + String.format("%.2f", valorBruto), font));
         document.add(new Paragraph("Acréscimo: " + response.getPagamento().getPorcentagemAcrescimo()

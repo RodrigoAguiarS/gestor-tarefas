@@ -20,7 +20,8 @@ public class VendaResponse {
     private LocalDateTime dataVenda;
     private List<ItemVendaResponse> itens;
     private String tipoVenda;
-    BigDecimal valorTotal;
-    StatusResponse status;
-    PagamentoResponse pagamento;
+    private String observacao;
+    private BigDecimal valorTotal;
+    private StatusResponse status;
+    private PagamentoResponse pagamento;
 }

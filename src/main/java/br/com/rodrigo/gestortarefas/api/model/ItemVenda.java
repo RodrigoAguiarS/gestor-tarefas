@@ -28,6 +28,9 @@ public class ItemVenda extends EntidadeBase {
     @JoinColumn(name = "id_venda")
     private Venda venda;
 
+    @Column(name = "observacao", length = 500)
+    private String observacao;
+
     @ManyToOne
     @JoinColumn(name = "id_produto")
     private Produto produto;

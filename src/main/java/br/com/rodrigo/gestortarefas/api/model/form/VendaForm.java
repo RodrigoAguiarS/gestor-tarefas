@@ -28,5 +28,7 @@ public class VendaForm {
 
     private String tipoVenda;
 
+    private String observacao;
+
     BigDecimal valorTotal;
 }
